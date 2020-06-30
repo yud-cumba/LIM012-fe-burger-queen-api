@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); // middleware
 
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;

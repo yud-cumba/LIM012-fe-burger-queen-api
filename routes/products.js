@@ -2,6 +2,7 @@ const {
   requireAuth,
   requireAdmin,
 } = require('../middleware/auth');
+const pool = require('../db-data/bq_data');
 
 /** @module products */
 module.exports = (app, nextMain) => {
@@ -27,9 +28,14 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
-  app.get('/products', requireAuth, (req, resp, next) => {
+  /* app.get('/products', requireAuth, (req, resp, next) => {
+  }); */
+  app.get('/products', (request, response) => {
+    pool.query('SELECT * FROM products', (error, result) => {
+      if (error) throw error;
+      response.send(result);
+    });
   });
-
   /**
    * @name GET /products/:productId
    * @description Obtiene los datos de un producto especifico
