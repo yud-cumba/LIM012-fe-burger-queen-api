@@ -22,17 +22,11 @@ module.exports = (app, nextMain) => {
     const { email, password } = req.body;
 
     // TODO: autenticar a la usuarix
-    pool.query('SELECT * FROM users ', (error, result) => {
-      if (error) throw error;
-      result.map((user) => {
-        const payload = { uid: user.idUsers, email: user.email, roles: user.rolesAdmin };
-        resp.send({ message: 'authentication successful', token: jwt.sign(payload, secret) });
-      });
-    });
 
     if (!email || !password) {
       return next(400);
     }
+
     next();
   });
   return nextMain();
