@@ -29,25 +29,13 @@ module.exports = (app, nextMain) => {
     // return resp.send({ message: 'authentication successful', token: jwt.sign(payload, secret) });
 
     const query = await pool.query('SELECT * FROM auth ', (error, result) => {
-      console.log('vaina');
       if (error) throw error;
       return result.some((user) => user.email === email && user.passwordAuth === password);
-      // if (result.some((user) => user.email === email && user.passwordAuth === password)) {
-      // const token = jwt.sign({ email }, 'enviroment_var');
-      // resp.send('hola');
-      // resp.json({
-      //   token,
-      // });
-      // }
     });
-    // console.log(query);
-    // resp.send(query);
     if (query) {
-      const token = jwt.sign({ email }, 'enviroment_var');
-      // resp.send('hola');
-      resp.json({
-        token,
-      });
+      const token = jwt.sign({ email }, 'secret');
+      return resp.header('auth-token', token);
+      // .send({ message: 'succesful', token });
     }
 
     next();
