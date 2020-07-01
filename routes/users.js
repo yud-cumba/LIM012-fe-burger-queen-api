@@ -13,7 +13,7 @@ const {
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
-    return next();
+    return next();// 400
   }
 
   const adminUser = {
@@ -117,6 +117,7 @@ module.exports = (app, next) => {
    * @code {403} si ya existe usuaria con ese `email`
    */
   app.post('/users', requireAdmin, (req, resp, next) => {
+    resp.send({ greetings:'hello world' });
   });
 
   /**
