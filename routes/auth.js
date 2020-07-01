@@ -18,21 +18,38 @@ module.exports = (app, nextMain) => {
    * @code {400} si no se proveen `email` o `password` o ninguno de los dos
    * @auth No requiere autenticación
    */
-  app.post('/auth', (req, resp, next) => {
+  app.post('/auth', async (req, resp, next) => {
     const { email, password } = req.body;
-
-    // TODO: autenticar a la usuarix
-    pool.query('SELECT * FROM users ', (error, result) => {
-      if (error) throw error;
-      result.map((user) => {
-        const payload = { uid: user.idUsers, email: user.email, roles: user.rolesAdmin };
-        resp.send({ message: 'authentication successful', token: jwt.sign(payload, secret) });
-      });
-    });
-
     if (!email || !password) {
       return next(400);
     }
+
+    // TODO: autenticar a la usuarix
+    // const payload = { uid: user.idUsers, email: user.email, roles: user.rolesAdmin };
+    // return resp.send({ message: 'authentication successful', token: jwt.sign(payload, secret) });
+
+    const query = await pool.query('SELECT * FROM auth ', (error, result) => {
+      console.log('vaina');
+      if (error) throw error;
+      return result.some((user) => user.email === email && user.passwordAuth === password);
+      // if (result.some((user) => user.email === email && user.passwordAuth === password)) {
+      // const token = jwt.sign({ email }, 'enviroment_var');
+      // resp.send('hola');
+      // resp.json({
+      //   token,
+      // });
+      // }
+    });
+    // console.log(query);
+    // resp.send(query);
+    if (query) {
+      const token = jwt.sign({ email }, 'enviroment_var');
+      // resp.send('hola');
+      resp.json({
+        token,
+      });
+    }
+
     next();
   });
   return nextMain();
