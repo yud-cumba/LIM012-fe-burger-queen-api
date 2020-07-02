@@ -14,8 +14,10 @@ app.set('pkg', pkg);
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.get('/holi', (req, resp, next) => {
+  resp.send('hola mundo');
+});
 app.use(authMiddleware(secret)); // importa el condigo de middleware
-
 // Registrar rutas
 routes(app, (err) => {
   if (err) {

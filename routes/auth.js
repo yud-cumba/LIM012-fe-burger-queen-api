@@ -40,7 +40,6 @@ module.exports = (app, nextMain) => {
     } catch (error) {
       return error;
     }
-
     // next();
   });
   return nextMain();
