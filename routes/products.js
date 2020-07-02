@@ -28,8 +28,8 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
-  // app.get('/products', requireAuth, (req, resp, next) => {
-  app.get('/products', (req, resp, next) => {
+  app.get('/products', requireAuth, (req, resp, next) => {
+  // app.get('/products', (req, resp, next) => {
     pool.query('SELECT * FROM products', (error, result) => {
       if (error) throw error;
       resp.send(result);
@@ -54,9 +54,9 @@ module.exports = (app, nextMain) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {404} si el producto con `productId` indicado no existe
    */
-  // app.get('/products/:productId', requireAuth, (req, resp, next) => {
-  app.get('/products/:productId', (req, resp, next) => {
-    const id = request.params.id;
+  app.get('/products/:productId', requireAuth, (req, resp, next) => {
+  // app.get('/products/:productId', (req, resp, next) => {
+    const id = req.params.id;
     pool.query('SELECT * FROM products WHERE id = ?', id, (error, result) => {
       if (error) throw error;
       resp.send(result);

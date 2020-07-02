@@ -23,22 +23,25 @@ module.exports = (app, nextMain) => {
     if (!email || !password) {
       return next(400);
     }
-
     // TODO: autenticar a la usuarix
-    // const payload = { uid: user.idUsers, email: user.email, roles: user.rolesAdmin };
-    // return resp.send({ message: 'authentication successful', token: jwt.sign(payload, secret) });
-
-    const query = await pool.query('SELECT * FROM auth ', (error, result) => {
-      if (error) throw error;
-      return result.some((user) => user.email === email && user.passwordAuth === password);
-    });
-    if (query) {
-      const token = jwt.sign({ email }, 'secret');
-      resp.send({ message: 'succesful', token });
-      return resp.header('auth-token', token);
+    try {
+      const query = await pool.query('SELECT * FROM auth ', (error, result) => {
+        if (error) throw error;
+        const someUserDB = result.some((user) => user.email === email && user.passwordAuth === password);
+        if (someUserDB === true) {
+          const token = jwt.sign({ email }, secret);
+          console.log(secret);
+          resp.header('authorization', token);
+          return resp.status(200).send({ message: 'succesful', token });
+        }
+        next(404);
+      });
+      return query;
+    } catch (error) {
+      return error;
     }
 
-    next();
+    // next();
   });
   return nextMain();
 };
