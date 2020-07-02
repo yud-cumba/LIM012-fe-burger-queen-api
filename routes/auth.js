@@ -18,13 +18,24 @@ module.exports = (app, nextMain) => {
    * @code {400} si no se proveen `email` o `password` o ninguno de los dos
    * @auth No requiere autenticación
    */
-  app.post('/auth', (req, resp, next) => {
+  app.post('/auth', async (req, resp, next) => {
     const { email, password } = req.body;
-
-    // TODO: autenticar a la usuarix
-
     if (!email || !password) {
       return next(400);
+    }
+
+    // TODO: autenticar a la usuarix
+    // const payload = { uid: user.idUsers, email: user.email, roles: user.rolesAdmin };
+    // return resp.send({ message: 'authentication successful', token: jwt.sign(payload, secret) });
+
+    const query = await pool.query('SELECT * FROM auth ', (error, result) => {
+      if (error) throw error;
+      return result.some((user) => user.email === email && user.passwordAuth === password);
+    });
+    if (query) {
+      const token = jwt.sign({ email }, 'secret');
+      resp.send({ message: 'succesful', token });
+      return resp.header('auth-token', token);
     }
 
     next();
