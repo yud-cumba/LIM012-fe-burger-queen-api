@@ -58,7 +58,7 @@ module.exports = (app, nextMain) => {
   app.get('/products/:productId', requireAuth, (req, resp, next) => {
   // app.get('/products/:productId', (req, resp, next) => {
     const { id } = req.params;
-    pool.query('SELECT * FROM products WHERE id = ?', id, (error, result) => {
+    pool.query('SELECT * FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
       resp.status(200).send(result);
     });
@@ -121,7 +121,7 @@ module.exports = (app, nextMain) => {
    */
   app.put('/products/:productId', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
-    pool.query('UPDATE users SET ? WHERE id = ?', [req.body, id], (error, result) => {
+    pool.query('UPDATE products SET ? WHERE idProducts = ?', [req.body, id], (error, result) => {
       if (error) throw error;
       resp.send('User updated successfully.');
     });
@@ -148,7 +148,7 @@ module.exports = (app, nextMain) => {
    */
   app.delete('/products/:productId', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
-    pool.query('DELETE FROM users WHERE id = ?', id, (error, result) => {
+    pool.query('DELETE FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
       resp.send('User deleted.');
     });
