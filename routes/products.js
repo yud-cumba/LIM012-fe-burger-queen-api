@@ -32,11 +32,12 @@ module.exports = (app, nextMain) => {
   // app.get('/products', (req, resp, next) => {
     pool.query('SELECT * FROM products', (error, result) => {
       if (error) throw error;
-      resp.send(result);
+      const sizeOfData = result.lenght;
+      const products = (sizeOfData < 10) ? result : result.slice(0, 10);
+      resp.send(products);
     });
     next();
   });
-
   /**
    * @name GET /products/:productId
    * @description Obtiene los datos de un producto especifico
@@ -56,10 +57,10 @@ module.exports = (app, nextMain) => {
    */
   app.get('/products/:productId', requireAuth, (req, resp, next) => {
   // app.get('/products/:productId', (req, resp, next) => {
-    const id = req.params.id;
+    const { id } = req.params;
     pool.query('SELECT * FROM products WHERE id = ?', id, (error, result) => {
       if (error) throw error;
-      resp.send(result);
+      resp.status(200).send(result);
     });
     next();
   });
@@ -87,6 +88,11 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.post('/products', requireAdmin, (req, resp, next) => {
+    pool.query('INSERT INTO products SET ?', req.body, (error, result) => {
+      if (error) throw error;
+      resp.status(200).send(result);
+    });
+    next();
   });
 
 
@@ -114,6 +120,12 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.put('/products/:productId', requireAdmin, (req, resp, next) => {
+    const { id } = req.params;
+    pool.query('UPDATE users SET ? WHERE id = ?', [req.body, id], (error, result) => {
+      if (error) throw error;
+      resp.send('User updated successfully.');
+    });
+    next();
   });
 
   /**
@@ -135,6 +147,12 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.delete('/products/:productId', requireAdmin, (req, resp, next) => {
+    const { id } = req.params;
+    pool.query('DELETE FROM users WHERE id = ?', id, (error, result) => {
+      if (error) throw error;
+      resp.send('User deleted.');
+    });
+    next();
   });
 
   nextMain();

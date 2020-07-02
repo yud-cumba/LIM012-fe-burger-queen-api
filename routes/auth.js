@@ -22,11 +22,11 @@ module.exports = (app, nextMain) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return next(400);
-    }
-    // TODO: autenticar a la usuarix
+    }// TODO: autenticar a la usuarix
     try {
       const query = await pool.query('SELECT * FROM auth ', (error, result) => {
         if (error) throw error;
+        // eslint-disable-next-line max-len
         const someUserDB = result.some((user) => user.email === email && user.passwordAuth === password);
         if (someUserDB === true) {
           const token = jwt.sign({ email }, secret);
@@ -40,7 +40,6 @@ module.exports = (app, nextMain) => {
     } catch (error) {
       return error;
     }
-
     // next();
   });
   return nextMain();
