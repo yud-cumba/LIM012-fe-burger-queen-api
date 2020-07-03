@@ -14,14 +14,13 @@ app.set('pkg', pkg);
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(authMiddleware(secret)); // importa el condigo de middleware
 
+app.use(authMiddleware(secret)); // importa el condigo de middleware
 // Registrar rutas
 routes(app, (err) => {
   if (err) {
     throw err;
   }
-
   app.use(errorHandler);
 
   app.listen(port, () => { // iniciar en el puerto ${port}
