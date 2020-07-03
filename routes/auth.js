@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const config = require('../config');
 const pool = require('../db-data/bq_data');
+const auth = require('../middleware/auth');
 
 const { secret } = config;
 
@@ -26,23 +27,22 @@ module.exports = (app, nextMain) => {
     }
     // TODO: autenticar a la usuarix
     try {
-      const query = await pool.query('SELECT * FROM users', (error, result) => {
+      await pool.query('SELECT * FROM users', (error, result) => {
         if (error) throw error;
-        const passwordEncripted = bcrypt.hashSync(password, 10);
-        const isInDB = result.some((user) => user.email === email && user.userpassword === passwordEncripted);
-        if (isInDB) {
-          const token = jwt.sign({ email }, secret);
+        const payload = result.find((user) => user.email === email && bcrypt.compareSync(password, user.userpassword));
+        if (payload) {
+          const token = jwt.sign({ email: payload.email, password: payload.userpassword }, secret);
           resp.header('authorization', token);
-          return resp.status(200).send({ message: 'succesful', token });
+          resp.status(200).send({ message: 'succesful', token });
+        } else {
+          next(404);
         }
-        next(404);
       });
-      console.log(query);
-      return query;
     } catch (error) {
       return error;
     }
     // next();
   });
+  console.log('salgo de auth');
   return nextMain();
 };

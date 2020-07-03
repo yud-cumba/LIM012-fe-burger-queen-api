@@ -24,9 +24,7 @@ const initAdminUser = (app, next) => {
   };
   // TODO: crear usuaria admin
   pool.query('SELECT * from users', (error, result) => {
-    if (result.lenght > 0) {
-      next();
-    } else {
+    if (result.length === 0) {
       pool.query('INSERT INTO users SET ?', adminUser, (error, result) => {
         if (error) throw error;
       });

@@ -1,29 +1,46 @@
 const jwt = require('jsonwebtoken'); // middleware
+const pool = require('../db-data/bq_data');
 
 module.exports = (secret) => (req, resp, next) => {
+  console.log('entro al mdw');
+
   const { authorization } = req.headers;
 
-  if (!authorization) {
+  if (!authorization) { // si no hay token
     return next();
   }
 
   const [type, token] = authorization.split(' ');
+  // console.log(req);
+
 
   if (type.toLowerCase() !== 'bearer') {
     return next();
   }
 
-  jwt.verify(token, secret, (err, decodedToken) => {
+  jwt.verify(token, secret, async (err, decodedToken) => {
     if (err) {
       return next(403);
     }
     // TODO: Verificar identidad del usuario usando `decodedToken.uid`
+    try {
+      await pool.query('SELECT * FROM users', (error, result) => {
+        if (error) { throw error; }
+        const userVerified = result.find((user) => user.email === decodedToken.email);
+        if (userVerified) { 
+          req.user = userVerified;
+          next();
+        } else { next(404); }
+      });
+    } catch (error) {
+      next(404);
+    }
+    // console.log(decodedToken.email);
   });
 };
 
-
 module.exports.isAuthenticated = (req) => {
-  // TODO: decidir por la informacion del request si la usuaria esta autenticada
+  console.log(req.user);
   if (req.user) {
     return true;
   }
@@ -31,7 +48,7 @@ module.exports.isAuthenticated = (req) => {
 };
 
 module.exports.isAdmin = (req) => {
-  // TODO: TODO: decidir por la informacion del request si la usuaria es admin
+  // TODO: decidir por la informacion del request si la usuaria es admin
   if (req.user.rolesAdmin) {
     return true;
   }
