@@ -23,7 +23,8 @@ module.exports = (app, nextMain) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return next(400);
-    }// TODO: autenticar a la usuarix
+    }
+    // TODO: autenticar a la usuarix
     try {
       const query = await pool.query('SELECT * FROM users', (error, result) => {
         if (error) throw error;
@@ -36,6 +37,7 @@ module.exports = (app, nextMain) => {
         }
         next(404);
       });
+      console.log(query);
       return query;
     } catch (error) {
       return error;
