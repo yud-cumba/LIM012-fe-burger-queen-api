@@ -59,7 +59,6 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.get('/products/:id', requireAuth, (req, resp, next) => {
-  // app.get('/products/:productId', (req, resp, next) => {
     const { id } = req.params;
     pool.query('SELECT * FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
