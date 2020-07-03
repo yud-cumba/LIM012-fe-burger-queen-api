@@ -19,17 +19,18 @@ const initAdminUser = (app, next) => {
 
   const adminUser = {
     email: adminEmail,
-    password: bcrypt.hashSync(adminPassword, 10),
-    roles: { admin: true },
+    userpassword: bcrypt.hashSync(adminPassword, 10),
+    rolesAdmin: true,
   };
-  console.log(adminPassword);
-  console.log(adminUser);
   // TODO: crear usuaria admin
-  app.post('/user', (req, resp) => {
-    pool.query('INSERT INTO users SET ?', req.body, (error, result) => {
-      if (error) throw error;
-      resp.status(200).send(result);
-    });
+  pool.query('SELECT * from users', (error, result) => {
+    if (result.lenght > 0) {
+      next();
+    } else {
+      pool.query('INSERT INTO users SET ?', adminUser, (error, result) => {
+        if (error) throw error;
+      });
+    }
   });
   next();
 };

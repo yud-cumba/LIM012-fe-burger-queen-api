@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const config = require('../config');
 const pool = require('../db-data/bq_data');
 
@@ -26,11 +27,11 @@ module.exports = (app, nextMain) => {
     // TODO: autenticar a la usuarix
 
     try {
-      const query = await pool.query('SELECT * FROM users ', (error, result) => {
+      const query = await pool.query('SELECT * FROM users', (error, result) => {
         if (error) throw error;
-        // eslint-disable-next-line max-len
-        const someUserDB = result.some((user) => user.email === email);
-        if (someUserDB === true) {
+        const passwordEncripted = bcrypt.hashSync(password, 10);
+        const isInDB = result.some((user) => user.email === email && user.userpassword === passwordEncripted);
+        if (isInDB) {
           const token = jwt.sign({ email }, secret);
           resp.header('authorization', token);
           return resp.status(200).send({ message: 'succesful', token });
