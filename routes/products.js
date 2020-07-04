@@ -3,6 +3,7 @@ const {
   requireAdmin,
 } = require('../middleware/auth');
 const pool = require('../db-data/bq_data');
+const { response } = require('express');
 
 /** @module products */
 module.exports = (app, nextMain) => {
@@ -28,17 +29,29 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
-  app.get('/products', requireAuth, async (req, resp, next) => {
+  /*app.get('/products', requireAuth, (req, resp, next) => {
   // app.get('/products', (req, resp, next) => {
-    console.log('entro');
-    let product = [];
-    await pool.query('SELECT * FROM products', (error, result) => {
-      console.log('entre al query');
+    console.log('1');
+    new Promise((resolve, reject) => {
+      console.log('2');
+      pool.query('SELECT * FROM products', (error, result) => {
+        const sizeOfData = result.length;
+        const products = (sizeOfData < 10) ? result : result.slice(0, 10);
+        resolve(products);
+      });
+    }).then((products) => {
+      console.log('3');
+      resp.send(products);
+      return next();
+    });
+    console.log('4');
+  });*/
+  app.get('/products', requireAuth, (req, resp, next) => {
+    pool.query('SELECT * FROM products', (error, result) => {
       if (error) throw error;
       const sizeOfData = result.length;
       const products = (sizeOfData < 10) ? result : result.slice(0, 10);
-      resp.send(products);
-      next();
+      return resp.send(products);
     });
   });
   /**
@@ -62,8 +75,7 @@ module.exports = (app, nextMain) => {
     const { id } = req.params;
     pool.query('SELECT * FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
-      resp.status(200).send(result);
-      next();
+      return resp.status(200).send(result);
     });
   });
 
@@ -92,8 +104,7 @@ module.exports = (app, nextMain) => {
   app.post('/products', requireAdmin, (req, resp, next) => {
     pool.query('INSERT INTO products SET ?', req.body, (error, result) => {
       if (error) throw error;
-      resp.status(200).send('New product inserted succesful!');
-      next();
+      return resp.status(200).send('New product inserted succesful!');
     });
   });
 
@@ -125,8 +136,7 @@ module.exports = (app, nextMain) => {
     const { id } = req.params;
     pool.query('UPDATE products SET ? WHERE idProducts = ?', [req.body, id], (error, result) => {
       if (error) throw error;
-      resp.send('Product updated successfully.');
-      next();
+      return resp.send('Product updated successfully.');
     });
   });
 
@@ -152,8 +162,7 @@ module.exports = (app, nextMain) => {
     const { id } = req.params;
     pool.query('DELETE FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
-      resp.send('User deleted.');
-      next();
+      return resp.send('User deleted.');
     });
   });
   nextMain();
