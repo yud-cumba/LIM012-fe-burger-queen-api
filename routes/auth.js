@@ -44,6 +44,5 @@ module.exports = (app, nextMain) => {
     }
     // next();
   });
-  console.log('salgo de auth');
   return nextMain();
 };

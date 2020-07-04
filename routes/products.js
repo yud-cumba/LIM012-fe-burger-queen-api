@@ -3,6 +3,7 @@ const {
   requireAdmin,
 } = require('../middleware/auth');
 const pool = require('../db-data/bq_data');
+const { response } = require('express');
 
 /** @module products */
 module.exports = (app, nextMain) => {
@@ -28,15 +29,30 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
-  app.get('/products', requireAuth, (req, resp, next) => {
+  /*app.get('/products', requireAuth, (req, resp, next) => {
   // app.get('/products', (req, resp, next) => {
+    console.log('1');
+    new Promise((resolve, reject) => {
+      console.log('2');
+      pool.query('SELECT * FROM products', (error, result) => {
+        const sizeOfData = result.length;
+        const products = (sizeOfData < 10) ? result : result.slice(0, 10);
+        resolve(products);
+      });
+    }).then((products) => {
+      console.log('3');
+      resp.send(products);
+      return next();
+    });
+    console.log('4');
+  });*/
+  app.get('/products', requireAuth, (req, resp, next) => {
     pool.query('SELECT * FROM products', (error, result) => {
       if (error) throw error;
-      const sizeOfData = result.lenght;
+      const sizeOfData = result.length;
       const products = (sizeOfData < 10) ? result : result.slice(0, 10);
-      resp.send(products);
+      return resp.send(products);
     });
-    next();
   });
   /**
    * @name GET /products/:productId
@@ -55,14 +71,12 @@ module.exports = (app, nextMain) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.get('/products/:productId', requireAuth, (req, resp, next) => {
-  // app.get('/products/:productId', (req, resp, next) => {
+  app.get('/products/:id', requireAuth, (req, resp, next) => {
     const { id } = req.params;
     pool.query('SELECT * FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
-      resp.status(200).send(result);
+      return resp.status(200).send(result);
     });
-    next();
   });
 
   /**
@@ -90,9 +104,8 @@ module.exports = (app, nextMain) => {
   app.post('/products', requireAdmin, (req, resp, next) => {
     pool.query('INSERT INTO products SET ?', req.body, (error, result) => {
       if (error) throw error;
-      resp.status(200).send(result);
+      return resp.status(200).send('New product inserted succesful!');
     });
-    next();
   });
 
 
@@ -119,13 +132,12 @@ module.exports = (app, nextMain) => {
    * @code {403} si no es admin
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.put('/products/:productId', requireAdmin, (req, resp, next) => {
+  app.put('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
     pool.query('UPDATE products SET ? WHERE idProducts = ?', [req.body, id], (error, result) => {
       if (error) throw error;
-      resp.send('User updated successfully.');
+      return resp.send('Product updated successfully.');
     });
-    next();
   });
 
   /**
@@ -146,14 +158,12 @@ module.exports = (app, nextMain) => {
    * @code {403} si no es ni admin
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.delete('/products/:productId', requireAdmin, (req, resp, next) => {
+  app.delete('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
     pool.query('DELETE FROM products WHERE idProducts = ?', id, (error, result) => {
       if (error) throw error;
-      resp.send('User deleted.');
+      return resp.send('User deleted.');
     });
-    next();
   });
-
   nextMain();
 };
