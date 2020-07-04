@@ -25,6 +25,7 @@ module.exports = (app, nextMain) => {
     if (!email || !password) {
       return next(400);
     }
+    console.log(`TOKEN/ auth email:${email} ${password}`);
     // TODO: autenticar a la usuarix
     try {
       await pool.query('SELECT * FROM users', (error, result) => {

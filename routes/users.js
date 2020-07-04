@@ -9,6 +9,7 @@ const {
 const {
   getUsers,
 } = require('../controller/users');
+const { port } = require('../config'); //  ?
 
 
 const initAdminUser = (app, next) => {
@@ -16,6 +17,7 @@ const initAdminUser = (app, next) => {
   if (!adminEmail || !adminPassword) {
     return next();// 400
   }
+  console.log(`log adminpassword: ${adminPassword}`);
 
   const adminUser = {
     email: adminEmail,
@@ -123,9 +125,22 @@ module.exports = (app, next) => {
    * @code {403} si ya existe usuaria con ese `email`
    */
   app.post('/users', requireAdmin, (_req, resp, _next) => {
-    resp.send({ greetings: 'hello world' });
+    const { email, password, roles } = _req.body;
+    if (!email || !password) {
+      _next(400);
+    } else if (!_req.headers.authorization) {
+      _next(401);
+    }
+    const userdetails = {
+      email,
+      userpassword: bcrypt.hashSync(password, 10),
+      rolesAdmin: roles.admin,
+    };
+    // console.log(getUsers);
+    // pool.query('INSERT INTO users SET ?', userdetails, (error, result) => {
+    //   if (error) throw error;
+    // });
   });
-
   /**
    * @name PUT /users
    * @description Modifica una usuaria

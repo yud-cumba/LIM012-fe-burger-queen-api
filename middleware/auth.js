@@ -2,8 +2,6 @@ const jwt = require('jsonwebtoken'); // middleware
 const pool = require('../db-data/bq_data');
 
 module.exports = (secret) => (req, resp, next) => {
-  console.log('entro al mdw');
-
   const { authorization } = req.headers;
 
   if (!authorization) { // si no hay token
@@ -11,8 +9,6 @@ module.exports = (secret) => (req, resp, next) => {
   }
 
   const [type, token] = authorization.split(' ');
-  // console.log(req);
-
 
   if (type.toLowerCase() !== 'bearer') {
     return next();
@@ -27,20 +23,19 @@ module.exports = (secret) => (req, resp, next) => {
       await pool.query('SELECT * FROM users', (error, result) => {
         if (error) { throw error; }
         const userVerified = result.find((user) => user.email === decodedToken.email);
-        if (userVerified) { 
+        if (userVerified) {
           req.user = userVerified;
+          console.log(`middleware decode token ${req.user}`);
           next();
         } else { next(404); }
       });
     } catch (error) {
       next(404);
     }
-    // console.log(decodedToken.email);
   });
 };
 
 module.exports.isAuthenticated = (req) => {
-  console.log(req.user);
   if (req.user) {
     return true;
   }
