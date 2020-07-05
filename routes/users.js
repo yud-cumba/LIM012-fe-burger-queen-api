@@ -11,6 +11,12 @@ const {
 } = require('../controller/users');
 const { port } = require('../config'); //  ?
 
+// Hepers
+const {
+  isUserEmailInRecord, addUser, askDBforUser,
+  updateuser,
+} = require('../db-data/helper_functions');
+
 
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
@@ -20,6 +26,7 @@ const initAdminUser = (app, next) => {
   console.log(`log adminpassword: ${adminPassword}`);
 
   const adminUser = {
+    id: Number('1010101'),
     email: adminEmail,
     userpassword: bcrypt.hashSync(adminPassword, 10),
     rolesAdmin: true,
@@ -102,7 +109,23 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAuth, (_req, _resp) => {
+  app.get('/users/:uid', requireAuth, async (_req, _resp) => {
+    const { uid } = _req.params;
+    const { email } = _req.body;
+    if (!email || !uid) {
+      _resp.status(400);
+    } else if (!_req.headers.authorization) {
+      _resp.status(401);
+    }
+    let getUserID;
+    await pool.query('SELECT * FROM users', (error, result) => {
+      if (error) throw error;
+      getUserID = result.filter((ele) => ele.id === Number(uid) && ele.email === email);
+      if (!getUserID.length) {
+        return _resp.status(404).send({ message: 'La usuaria solicitada no existe' });
+      }
+      return _resp.status(200).send(getUserID[0]);
+    });
   });
 
   /**
@@ -124,22 +147,26 @@ module.exports = (app, next) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {403} si ya existe usuaria con ese `email`
    */
-  app.post('/users', requireAdmin, (_req, resp, _next) => {
+  app.post('/users', requireAdmin, async (_req, resp, _next) => {
+    // Para verificar valores
     const { email, password, roles } = _req.body;
     if (!email || !password) {
       _next(400);
     } else if (!_req.headers.authorization) {
       _next(401);
     }
-    const userdetails = {
+    // Para encriptar password
+    const newUserdetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
       rolesAdmin: roles.admin,
     };
-    // console.log(getUsers);
-    // pool.query('INSERT INTO users SET ?', userdetails, (error, result) => {
-    //   if (error) throw error;
-    // });
+    // Para saber si usuario existe en la base de datos
+    if (!askDBforUser(newUserdetails, isUserEmailInRecord)) {
+      addUser(newUserdetails, resp);
+    } else {
+      return resp.status(403).send({ message: `Ya existe usuaria con ese: ${email}` });
+    }
   });
   /**
    * @name PUT /users
@@ -163,7 +190,35 @@ module.exports = (app, next) => {
    * @code {403} una usuaria no admin intenta de modificar sus `roles`
    * @code {404} si la usuaria solicitada no existe
    */
-  app.put('/users/:uid', requireAuth, (_req, _resp, _next) => {
+  app.put('/users/:uid', requireAuth, async (_req, _resp, _next) => {
+    const { uid } = _req.params;
+    const { email, password, roles } = _req.body;
+    if (!email || !uid) {
+      _next(400);
+    } else if (!_req.headers.authorization) {
+      _next(401);
+    }
+
+    const updateDetails = {
+      email,
+      userpassword: bcrypt.hashSync(password, 10),
+      rolesAdmin: roles.admin,
+    };
+    /**
+    console.log(Object.keys(_req));
+    console.log(`route: ${_req.route.path}`);
+    */
+    // console.log(askDBforUser(uid, getUserByUid));
+    // console.log(askDBforUser(uid));
+    let getUserID;
+    await pool.query('SELECT * FROM users', (error, result) => {
+      if (error) throw error;
+      getUserID = result.filter((ele) => ele.id === Number(uid) && ele.email === email);
+      if (!getUserID.length) {
+        return _resp.status(404).send({ message: 'La usuaria solicitada no existe' });
+      }
+      updateuser(updateDetails, uid, _resp);
+    });
   });
 
   /**
@@ -182,7 +237,32 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.delete('/users/:uid', requireAuth, (_req, _resp, _next) => {
+  app.delete('/users/:uid', requireAuth, async (_req, _resp, _next) => {
+    const { uid } = _req.params;
+    const { email } = _req.body;
+    // askDBforUser(uid, getUserByUid);
+    if (!email || !uid) {
+      _next(400);
+    } else if (!_req.headers.authorization) {
+      _next(401);
+    }
+
+    let getUserID;
+    const handleDeleteQuery = (error, result) => {
+      if (error) throw error;
+      if (result) {
+        return _resp.status(200).send(getUserID[0]);
+      }
+    };
+
+    await pool.query('SELECT * FROM users', (error, result) => {
+      if (error) throw error;
+      getUserID = result.filter((ele) => ele.id === Number(uid) && ele.email === email);
+      if (!getUserID.length) {
+        return _resp.status(404).send({ message: 'La usuaria solicitada no existe' });
+      }
+      return pool.query('DELETE FROM users WHERE id = ?', Number(uid), handleDeleteQuery);
+    });
   });
 
   initAdminUser(app, next);
