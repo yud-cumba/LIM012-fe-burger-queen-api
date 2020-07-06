@@ -1,38 +1,35 @@
-const pool = require('../db-data/bq_data');
+const pool = require('./bq_data');
 
-const getData = (table, callback) => {
-  pool.query(`SELECT * FROM ${table}`, (error, result) => {
-    callback(error, result);
+const getDataByKeyword = (table, keyword, value) => new Promise((resolve, reject) => {
+  pool.query(`SELECT * FROM ${table} WHERE ${keyword}=?`, value, (error, result) => {
+    resolve(result);
+    reject(error);
   });
-};
+});
 
-const getDataById = (table, id, idValue, callback) => {
-  pool.query(`SELECT * FROM ${table} WHERE ${id}=?`, idValue, (error, result) => {
-    callback(error, result);
+const postData = (table, toInsert) => new Promise((resolve, reject) => {
+  pool.query(`INSERT INTO ${table} SET ?`, toInsert, (error, result) => {
+    resolve(result);
+    reject(error);
   });
-};
+});
 
-const postData = (table, toInsert, callback) => {
-  pool.query(`INSERT INTO${table}SET ?`, toInsert, (error, result) => {
-    callback(error, result);
+const updateDataByKeyword = (table, toUpdate, keyword, value) => new Promise((resolve, reject) => {
+  pool.query(`UPDATE ${table} SET ? WHERE ${keyword} = ?`, [toUpdate, value], (error, result) => {
+    resolve(result);
+    reject(error);
   });
-};
-
-const updateData = (table, toUpdate, id, idValue, callback) => {
-  pool.query(`UPDATE${table} SET ? WHERE${id} = ?`, [toUpdate, idValue], (error, result) => {
-    callback(error, result);
-  });
-};
-const deleteData = (table, id, idValue, callback) => {
+});
+const deleteData = (table, id, idValue) => new Promise((resolve, reject) => {
   pool.query(`DELETE FROM ${table} WHERE ${id} = ?`, idValue, (error, result) => {
-    callback(error, result);
+    resolve(result);
+    reject(error);
   });
-};
+});
 
 module.exports = {
-  getData,
-  getDataById,
+  getDataByKeyword,
   postData,
-  updateData,
+  updateDataByKeyword,
   deleteData,
 };
