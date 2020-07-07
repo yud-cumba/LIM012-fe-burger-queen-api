@@ -108,7 +108,7 @@ module.exports = (app, nextMain) => {
 
     getDataByKeyword('products', 'nameProduct', name)
       .then((product) => {
-        if (product) {
+        if (product.length > 0) {
           return postData('products', newProduct);
         }
       })
@@ -166,7 +166,7 @@ module.exports = (app, nextMain) => {
 
     getDataByKeyword('products', 'nameProduct', name)
       .then((product) => {
-        if (product) {
+        if (product.length > 0) {
           return updateDataByKeyword('products', newProduct, 'idProducts', id);
         }
       })
