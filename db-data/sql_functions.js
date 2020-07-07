@@ -2,8 +2,11 @@ const pool = require('./bq_data');
 
 const getDataByKeyword = (table, keyword, value) => new Promise((resolve, reject) => {
   pool.query(`SELECT * FROM ${table} WHERE ${keyword}=?`, value, (error, result) => {
-    resolve(result);
-    reject(error);
+    if (result.length > 0) {
+      resolve(result);
+    } else {
+      reject(error);
+    }
   });
 });
 

@@ -50,6 +50,9 @@ module.exports.isAdmin = (req) => {
   return false;
 };
 
+/*module.exports.isMyRecord = (req) => {
+ if(req.user.email === )
+};*/
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))

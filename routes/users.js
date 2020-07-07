@@ -20,7 +20,6 @@ const initAdminUser = (app, next) => {
   if (!adminEmail || !adminPassword) {
     return next();// 400
   }
-  console.log(`log adminpassword: ${adminPassword}`);
 
   const adminUser = {
     id: Number('1010101'),
@@ -106,18 +105,23 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAuth, (_req, _resp) => {
+  app.get('/users/:uid', requireAdmin, (_req, _resp) => {
     const { uid } = _req.params;
     const { email } = _req.body;
     dataError(!email || !uid, !_req.headers.authorization, _resp);
 
     getDataByKeyword('users', 'id', uid)
       .then((result) => {
-        if (result.length === 0) {
-          return _resp.status(404).send({ message: 'La usuaria solicitada no existe' });
-        }
-        return _resp.status(200).send(result);
-      });
+        const admin = !!(result[0].rolesAdmin);
+        return _resp.status(200).send(
+          {
+            _id: uid,
+            email: result[0].email,
+            roles: { admin },
+          },
+        );
+      })
+      .catch(() => _resp.status(404).send({ message: 'El producto solicitado no existe' }));
   });
 
   /**
@@ -154,19 +158,17 @@ module.exports = (app, next) => {
     // Para saber si usuario existe en la base de datos
 
     getDataByKeyword('users', 'email', email)
-      .then((user) => {
-        if (user) {
-          return postData('users', newUserdetails);
-        }
-        return resp.status(403).send({ message: `Ya existe usuaria con ese: ${email}` });
-      })
-      .then((result) => resp.status(200).send(
-        {
-          _id: result.insertId,
-          user: newUserdetails.email,
-          roles: { admin: newUserdetails.rolesAdmin },
-        },
-      ));
+      .then(() => resp.status(403).send({ message: `Ya existe usuaria con el email : ${email}` }))
+      .catch(() => {
+        postData('users', newUserdetails)
+          .then((result) => resp.status(200).send(
+            {
+              _id: result.insertId,
+              user: newUserdetails.email,
+              roles: { admin: newUserdetails.rolesAdmin },
+            },
+          ));
+      });
   });
   /**
    * @name PUT /users
@@ -190,32 +192,31 @@ module.exports = (app, next) => {
    * @code {403} una usuaria no admin intenta de modificar sus `roles`
    * @code {404} si la usuaria solicitada no existe
    */
-  app.put('/users/:uid', requireAuth, (_req, _resp, _next) => {
+  app.put('/users/:uid', requireAdmin && requireAuth, (_req, _resp, _next) => {
     const { uid } = _req.params;
     const { email, password, roles } = _req.body;
-
     dataError(!email || !uid, !_req.headers.authorization, _resp);
-
+    if (!(_req.user.id === Number(uid) || _req.user.rolesAdmin)) {
+      return _resp.status(403).send({ message: 'You do not have enough permissions' });
+    }
     const updateDetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
       rolesAdmin: roles.admin,
     };
 
-    getDataByKeyword('users', 'email', email)
-      .then((user) => {
-        if (user) {
-          return updateDataByKeyword('users', updateDetails, 'id', uid);
-        }
-        return _resp.status(403).send({ message: `Ya existe usuaria con ese: ${email}` });
+    getDataByKeyword('users', 'id', uid)
+      .then(() => {
+        updateDataByKeyword('users', updateDetails, 'id', uid);
+        return _resp.status(200).send(
+          {
+            _id: uid,
+            user: updateDetails.email,
+            roles: { admin: updateDetails.rolesAdmin },
+          },
+        );
       })
-      .then(() => _resp.status(200).send(
-        {
-          _id: uid,
-          user: updateDetails.email,
-          roles: { admin: updateDetails.rolesAdmin },
-        },
-      ));
+      .catch(() => _resp.status(404).send({ message: `El usuario con id ${uid} no existe.` }));
   });
 
   /**
@@ -234,24 +235,23 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.delete('/users/:uid', requireAuth, async (_req, _resp, _next) => {
+  app.delete('/users/:uid', requireAdmin, async (_req, _resp, _next) => {
     const { uid } = _req.params;
     const { email } = _req.body;
     dataError(!email || !uid, !_req.headers.authorization, _resp);
-    const updateDetails = {
+    const userDeleted = {
       _id: uid,
     };
 
     getDataByKeyword('users', 'id', uid)
       .then((user) => {
-        if (user.length > 0) {
-          updateDetails.user = user[0].email;
-          updateDetails.roles = { admin: user[0].rolesAdmin };
-          return deleteData('users', 'id', uid);
-        }
+        const admin = !!(user[0].rolesAdmin);
+        userDeleted.user = user[0].email;
+        userDeleted.roles = { admin };
+        deleteData('users', 'id', uid);
+        _resp.status(200).send(userDeleted);
       })
-      .then(() => _resp.status(200).send(updateDetails))
-      .catch(() => _resp.status(403).send({ message: `La usuaris ${email} no existe.` }));
+      .catch(() => _resp.status(403).send({ message: `No existe el usuario con id ${uid}` }));
   });
   initAdminUser(app, next);
 };

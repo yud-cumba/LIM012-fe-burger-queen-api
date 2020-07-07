@@ -2,7 +2,6 @@ const {
   requireAuth,
   requireAdmin,
 } = require('../middleware/auth');
-const pool = require('../db-data/bq_data');
 
 const { getData } = require('../controller/users');
 
@@ -37,7 +36,7 @@ module.exports = (app, nextMain) => {
    * @code {401} si no hay cabecera de autenticación
    */
 
-  app.get('/products', requireAdmin, (req, resp, next) => getData(req, resp, next, 'products'));
+  app.get('/products', requireAuth, (req, resp, next) => getData(req, resp, next, 'products'));
 
   /**
    * @name GET /products/:productId
@@ -61,12 +60,17 @@ module.exports = (app, nextMain) => {
     dataError(!id, !req.headers.authorization, resp);
 
     getDataByKeyword('products', 'idProducts', id)
-      .then((result) => {
-        if (result.length === 0) {
-          return resp.status(404).send({ message: 'El producto solicitado no existe' });
-        }
-        return resp.status(200).send(result);
-      });
+      .then((result) => resp.status(200).send(
+        {
+          _id: result[0].idProducts,
+          name: result[0].nameProduct,
+          price: result[0].price,
+          image: result[0].image,
+          type: result[0].typeProduct,
+          date: result[0].dateProduct,
+        },
+      ))
+      .catch(() => resp.status(404).send({ message: 'El producto solicitado no existe' }));
   });
 
   /**
@@ -89,7 +93,7 @@ module.exports = (app, nextMain) => {
    * @code {400} si no se indican `name` o `price`
    * @code {401} si no hay cabecera de autenticación
    * @code {403} si no es admin
-   * @code {404} si el producto con `productId` indicado no existe
+   * @code {404} si el producto ya existe
    */
   app.post('/products', requireAdmin, (req, resp, next) => {
     const {
@@ -107,22 +111,20 @@ module.exports = (app, nextMain) => {
     };
 
     getDataByKeyword('products', 'nameProduct', name)
-      .then((product) => {
-        if (product.length > 0) {
-          return postData('products', newProduct);
-        }
-      })
-      .then((result) => resp.status(200).send(
-        {
-          _id: result.insertId,
-          name: newProduct.nameProduct,
-          price,
-          image,
-          type,
-          date: newProduct.dateProduct,
-        },
-      ))
-      .catch(() => resp.status(403).send({ message: `Ya existe producto con ese: ${name}` }));
+      .then(() => resp.status(404).send({ message: `Ya existe un producto con el nombre: ${name}` }))
+      .catch(() => {
+        postData('products', newProduct)
+          .then((result) => resp.status(200).send(
+            {
+              _id: result.insertId,
+              name: newProduct.nameProduct,
+              price,
+              image,
+              type,
+              date: newProduct.dateProduct,
+            },
+          ));
+      });
   });
 
   /**
@@ -164,42 +166,40 @@ module.exports = (app, nextMain) => {
       dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
 
-    getDataByKeyword('products', 'nameProduct', name)
+    getDataByKeyword('products', 'idProducts', id)
       .then((product) => {
-        if (product.length > 0) {
-          return updateDataByKeyword('products', newProduct, 'idProducts', id);
-        }
+        updateDataByKeyword('products', newProduct, 'idProducts', id);
+        return resp.status(200).send(
+          {
+            _id: id,
+            name: product.nameProduct,
+            price,
+            image,
+            type,
+            date: product.dateProduct,
+          },
+        );
       })
-      .then(() => resp.status(200).send(
-        {
-          _id: id,
-          name: newProduct.nameProduct,
-          price,
-          image,
-          type,
-          date: newProduct.dateProduct,
-        },
-      ))
-      .catch(() => resp.status(403).send({ message: `Ya existe producto con ese: ${name}` }));
+      .catch(() => resp.status(404).send({ message: `No existe producto con ese nombre : ${name}` }));
   });
 
   /**
    * @name DELETE /products
-   * @description Elimina un producto
-   * @path {DELETE} /products
-   * @params {String} :productId `id` del producto
+   * @description Elimina un producto ✓
+   * @path {DELETE} /products ✓
+   * @params {String} :productId `id` del producto ✓
    * @auth Requiere `token` de autenticación y que el usuario sea **admin**
-   * @response {Object} product
+   * @response {Object} product✓
    * @response {String} product._id Id
    * @response {String} product.name Nombre
    * @response {Number} product.price Precio
    * @response {URL} product.image URL a la imagen
    * @response {String} product.type Tipo/Categoría
-   * @response {Date} product.dateEntry Fecha de creación
-   * @code {200} si la autenticación es correcta
-   * @code {401} si no hay cabecera de autenticación
-   * @code {403} si no es ni admin
-   * @code {404} si el producto con `productId` indicado no existe
+   * @response {Date} product.dateEntry Fecha de creación  ✓
+   * @code {200} si la autenticación es correcta ✓
+   * @code {401} si no hay cabecera de autenticación ✓
+   * @code {403} si no es ni admin ✓
+   * @code {404} si el producto con `productId` indicado no existe ✓
    */
   app.delete('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
@@ -209,17 +209,16 @@ module.exports = (app, nextMain) => {
     };
     getDataByKeyword('products', 'idProducts', id)
       .then((product) => {
-        if (product.length > 0) {
-          productDeleted.name = product[0].nameProduct;
-          productDeleted.price = product[0].price;
-          productDeleted.image = product[0].image;
-          productDeleted.type = product[0].typeProduct;
-          productDeleted.dateEntry = product[0].dateProduct;
-          return deleteData('products', 'idProducts', id);
-        }
+        productDeleted.name = product[0].nameProduct;
+        productDeleted.price = product[0].price;
+        productDeleted.image = product[0].image;
+        productDeleted.type = product[0].typeProduct;
+        productDeleted.dateEntry = product[0].dateProduct;
+        deleteData('products', 'idProducts', id);
+        return resp.status(200).send(productDeleted);
+        // resp.status(403).send({ message: `El producto con id ${id} no existe.` });
       })
-      .then(() => resp.status(200).send(productDeleted))
-      .catch(() => resp.status(403).send({ message: `El producto con id ${id} no existe.` }));
+      .catch(() => resp.status(404).send({ message: `No existe el producto con id ${id}.` }));
   });
   nextMain();
 };

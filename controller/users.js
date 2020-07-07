@@ -1,6 +1,6 @@
 // const query = require('../db-data/sql_functions');
 const pool = require('../db-data/bq_data');
-const pagination = require('../utils/utils');
+const { pagination } = require('../utils/utils');
 
 module.exports = {
   getData: (req, resp, next, table) => {
