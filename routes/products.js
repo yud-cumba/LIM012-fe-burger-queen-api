@@ -3,7 +3,14 @@ const {
   requireAdmin,
 } = require('../middleware/auth');
 const pool = require('../db-data/bq_data');
-const { response } = require('express');
+
+const { getData } = require('../controller/users');
+
+const {
+  getDataByKeyword, postData, updateDataByKeyword, deleteData,
+} = require('../db-data/sql_functions');
+
+const { dataError } = require('../utils/utils');
 
 /** @module products */
 module.exports = (app, nextMain) => {
@@ -29,36 +36,9 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
-  /*app.get('/products', requireAuth, (req, resp, next) => {
-  // app.get('/products', (req, resp, next) => {
-    console.log('1');
-    new Promise((resolve, reject) => {
-      console.log('2');
-      pool.query('SELECT * FROM products', (error, result) => {
-        const sizeOfData = result.length;
-        const products = (sizeOfData < 10) ? result : result.slice(0, 10);
-        resolve(products);
-      });
-    }).then((products) => {
-      console.log('3');
-      resp.send(products);
-      return next();
-    });
-    console.log('4');
-  });*/
-  app.get('/products', requireAuth, (req, resp, next) => {
-    pool.query('SELECT * FROM products', (error, result) => {
-      if (error) throw error;
-      const sizeOfData = result.length;
-      const numPages =  Math.ceil(sizeOfData / 10);
-      //const skip;
-      /*const products = {
-        results = 
-      };*/
-      const products = (sizeOfData < 10) ? result : result.slice(0, 10);
-      return resp.send(products);
-    });
-  });
+
+  app.get('/products', requireAdmin, (req, resp, next) => getData(req, resp, next, 'products'));
+
   /**
    * @name GET /products/:productId
    * @description Obtiene los datos de un producto especifico
@@ -78,10 +58,15 @@ module.exports = (app, nextMain) => {
    */
   app.get('/products/:id', requireAuth, (req, resp, next) => {
     const { id } = req.params;
-    pool.query('SELECT * FROM products WHERE idProducts = ?', id, (error, result) => {
-      if (error) throw error;
-      return resp.status(200).send(result);
-    });
+    dataError(!id, !req.headers.authorization, resp);
+
+    getDataByKeyword('products', 'idProducts', id)
+      .then((result) => {
+        if (result.length === 0) {
+          return resp.status(404).send({ message: 'El producto solicitado no existe' });
+        }
+        return resp.status(200).send(result);
+      });
   });
 
   /**
@@ -107,12 +92,38 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.post('/products', requireAdmin, (req, resp, next) => {
-    pool.query('INSERT INTO products SET ?', req.body, (error, result) => {
-      if (error) throw error;
-      return resp.status(200).send('New product inserted succesful!');
-    });
-  });
+    const {
+      name, price, image, type,
+    } = req.body;
+    dataError(!name || !price, !req.headers.authorization, resp);
+    const date = new Date();
 
+    const newProduct = {
+      nameProduct: name,
+      price,
+      image,
+      typeProduct: type,
+      dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+    };
+
+    getDataByKeyword('products', 'nameProduct', name)
+      .then((product) => {
+        if (product) {
+          return postData('products', newProduct);
+        }
+      })
+      .then((result) => resp.status(200).send(
+        {
+          _id: result.insertId,
+          name: newProduct.nameProduct,
+          price,
+          image,
+          type,
+          date: newProduct.dateProduct,
+        },
+      ))
+      .catch(() => resp.status(403).send({ message: `Ya existe producto con ese: ${name}` }));
+  });
 
   /**
    * @name PUT /products
@@ -139,10 +150,37 @@ module.exports = (app, nextMain) => {
    */
   app.put('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
-    pool.query('UPDATE products SET ? WHERE idProducts = ?', [req.body, id], (error, result) => {
-      if (error) throw error;
-      return resp.send('Product updated successfully.');
-    });
+    const {
+      name, price, image, type,
+    } = req.body;
+    dataError(!name || !price, !req.headers.authorization, resp);
+    const date = new Date();
+
+    const newProduct = {
+      nameProduct: name,
+      price,
+      image,
+      typeProduct: type,
+      dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+    };
+
+    getDataByKeyword('products', 'nameProduct', name)
+      .then((product) => {
+        if (product) {
+          return updateDataByKeyword('products', newProduct, 'idProducts', id);
+        }
+      })
+      .then(() => resp.status(200).send(
+        {
+          _id: id,
+          name: newProduct.nameProduct,
+          price,
+          image,
+          type,
+          date: newProduct.dateProduct,
+        },
+      ))
+      .catch(() => resp.status(403).send({ message: `Ya existe producto con ese: ${name}` }));
   });
 
   /**
@@ -165,10 +203,23 @@ module.exports = (app, nextMain) => {
    */
   app.delete('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
-    pool.query('DELETE FROM products WHERE idProducts = ?', id, (error, result) => {
-      if (error) throw error;
-      return resp.send('User deleted.');
-    });
+    dataError(!id, !req.headers.authorization, resp);
+    const productDeleted = {
+      _id: id,
+    };
+    getDataByKeyword('products', 'idProducts', id)
+      .then((product) => {
+        if (product.length > 0) {
+          productDeleted.name = product[0].nameProduct;
+          productDeleted.price = product[0].price;
+          productDeleted.image = product[0].image;
+          productDeleted.type = product[0].typeProduct;
+          productDeleted.dateEntry = product[0].dateProduct;
+          return deleteData('products', 'idProducts', id);
+        }
+      })
+      .then(() => resp.status(200).send(productDeleted))
+      .catch(() => resp.status(403).send({ message: `El producto con id ${id} no existe.` }));
   });
   nextMain();
 };
