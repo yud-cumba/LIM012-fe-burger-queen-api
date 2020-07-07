@@ -50,6 +50,11 @@ module.exports = (app, nextMain) => {
     pool.query('SELECT * FROM products', (error, result) => {
       if (error) throw error;
       const sizeOfData = result.length;
+      const numPages =  Math.ceil(sizeOfData / 10);
+      //const skip;
+      /*const products = {
+        results = 
+      };*/
       const products = (sizeOfData < 10) ? result : result.slice(0, 10);
       return resp.send(products);
     });
