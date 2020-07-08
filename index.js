@@ -5,6 +5,7 @@ const errorHandler = require('./middleware/error');
 const routes = require('./routes');
 const pkg = require('./package.json');
 
+// eslint-disable-next-line no-unused-vars
 const { port, dbUrl, secret } = config;
 const app = express(); // inicializarla
 

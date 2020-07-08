@@ -18,15 +18,19 @@ const pagination = (pages, limits, result) => {
     link.prev = `/users?page=${previousPage}&limit=${limits}`;
     link.next = `/users?page=${nextPage}&limit=${limits}`;
     results.list = usersQueryLimits;
+  } else if (!limits) {
+    results.list = result;
+  } else if (!pages) {
+    results.list = result.slice(0, limits);
   }
   return results;
 };
 
-const dataError = (condicion, headers, _resp) => {
+const dataError = (condicion, headers, _next) => {
   if (condicion) {
-    return _resp.status(400);
+    return _next(400);
   } if (headers) {
-    return _resp.status(401);
+    return _next(401);
   }
 };
 

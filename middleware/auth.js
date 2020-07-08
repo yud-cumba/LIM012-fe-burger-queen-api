@@ -25,7 +25,7 @@ module.exports = (secret) => (req, resp, next) => {
         const userVerified = result.find((user) => user.email === decodedToken.email);
         if (userVerified) {
           req.user = userVerified;
-          console.log(`middleware decode token ${req.user}`);
+          // console.log(`middleware decode token ${req.user}`);
           next();
         } else { next(404); }
       });
@@ -50,16 +50,15 @@ module.exports.isAdmin = (req) => {
   return false;
 };
 
-/*module.exports.isMyRecord = (req) => {
+/* module.exports.isMyRecord = (req) => {
  if(req.user.email === )
-};*/
+}; */
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))
     ? next(401)
     : next()
 );
-
 
 module.exports.requireAdmin = (req, resp, next) => (
   // eslint-disable-next-line no-nested-ternary

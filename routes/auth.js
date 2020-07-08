@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const config = require('../config');
@@ -20,7 +22,7 @@ module.exports = (app, nextMain) => {
    * @code {400} si no se proveen `email` o `password` o ninguno de los dos
    * @auth No requiere autenticación
    */
-  app.post('/auth', async (req, resp, next) => {
+  app.post('/auth', (req, resp, next) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return next(400);
@@ -28,8 +30,9 @@ module.exports = (app, nextMain) => {
     console.log(`TOKEN/ auth email:${email} ${password}`);
     // TODO: autenticar a la usuarix
     try {
-      await pool.query('SELECT * FROM users', (error, result) => {
+      pool.query('SELECT * FROM users', (error, result) => {
         if (error) throw error;
+        // eslint-disable-next-line max-len
         const payload = result.find((user) => user.email === email && bcrypt.compareSync(password, user.userpassword));
         if (payload) {
           const token = jwt.sign({ email: payload.email, password: payload.userpassword }, secret);
