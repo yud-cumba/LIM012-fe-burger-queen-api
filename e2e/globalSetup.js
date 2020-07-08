@@ -6,7 +6,7 @@ const kill = require('tree-kill');
 const config = require('../config');
 
 const port = process.env.PORT || 8888;
-const baseUrl = process.env.REMOTE_URL || `http://127.0.0.1:${port}`;
+const baseUrl = process.env.REMOTE_URL || `http://0.0.0.0:${port}`;
 
 const __e2e = {
   port,

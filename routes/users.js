@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
 const pool = require('../db-data/bq_data');
 
@@ -7,7 +8,6 @@ const {
 } = require('../middleware/auth');
 
 const { getData } = require('../controller/users');
-const { port } = require('../config'); //  ?
 
 const {
   getDataByKeyword, postData, updateDataByKeyword, deleteData,
@@ -152,7 +152,7 @@ module.exports = (app, next) => {
     const newUserdetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
-      rolesAdmin: roles.admin,
+    // rolesAdmin: roles.admin,
     };
 
     // Para saber si usuario existe en la base de datos
