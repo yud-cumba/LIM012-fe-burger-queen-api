@@ -5,6 +5,10 @@ const url = require('url');
 const qs = require('querystring');
 const config = require('../config');
 
+console.log(url);
+
+console.log(qs);
+
 const {
   fetch,
   fetchAsTestUser,
