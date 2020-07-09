@@ -19,7 +19,7 @@ const { dataError } = require('../utils/utils');
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
-    return next();// 400
+    return next();// 400 ✓
   }
 
   const adminUser = {
@@ -110,6 +110,7 @@ module.exports = (app, next) => {
     const { str } = _req.params;
 
     dataError(!str, !_req.headers.authorization, _resp);
+
     const keyword = (str.includes('@')) ? 'email' : 'id';
     getDataByKeyword('users', keyword, str)
       .then((result) => {
@@ -151,13 +152,13 @@ module.exports = (app, next) => {
     // eslint-disable-next-line no-console
     const condition = (!email || email === '') && (!password || password === '');
     // console.log(_req.body);
-    console.log(!email || email === '');// = FT = T
-    console.log(!password || password === '');// = TF = T
-    console.log(`condition ${condition}`);// T && T = 400
+    // console.log(!email || email === '');// = FT = T
+    // console.log(!password || password === '');// = TF = T
+    // console.log(`condition ${condition}`);// T && T = 400
 
-    dataError(condition, !_req.headers.authorization, _next);
+    dataError(condition, !_req.headers.authorization, resp);
     // Para encriptar password
-    const role = (!roles) ? 0 : 1;
+    const role = (roles) || false;
     const newUserdetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
@@ -246,8 +247,8 @@ module.exports = (app, next) => {
    */
   app.delete('/users/:uid', requireAdmin, async (_req, _resp, _next) => {
     const { uid } = _req.params;
-    const { email } = _req.body;
-    dataError(!email || !uid, !_req.headers.authorization, _resp);
+    // const { email } = _req.body;
+    // dataError(!email || !uid, !_req.headers.authorization, _resp);
     const userDeleted = {
       _id: uid,
     };

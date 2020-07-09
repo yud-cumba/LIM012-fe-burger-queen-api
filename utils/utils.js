@@ -26,11 +26,11 @@ const pagination = (pages, limits, result) => {
   return results;
 };
 
-const dataError = (condicion, headers, req) => {
+const dataError = (condicion, headers, _resp) => {
   if (condicion) {
-    return req.status(400);
+    return _resp.status(400);
   } if (headers) {
-    return req.status(401);
+    return _resp.status(401);
   }
 };
 

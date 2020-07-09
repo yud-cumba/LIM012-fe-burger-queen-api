@@ -100,7 +100,8 @@ module.exports = (app, nextMain) => {
     const {
       name, price, image, type,
     } = req.body;
-    dataError(!name || !price, !req.headers.authorization, resp);
+
+    dataError(!(name && price), !req.headers.authorization, resp);
     const date = new Date();
 
     const newProduct = {
@@ -151,6 +152,7 @@ module.exports = (app, nextMain) => {
    * @code {403} si no es admin
    * @code {404} si el producto con `productId` indicado no existe
    */
+
   app.put('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
     const {
