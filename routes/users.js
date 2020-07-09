@@ -158,11 +158,11 @@ module.exports = (app, next) => {
 
     dataError(condition, !_req.headers.authorization, resp);
     // Para encriptar password
-    const role = (roles) || false;
+    // const role = (roles.admin === true);
     const newUserdetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
-      rolesAdmin: role,
+      // rolesAdmin: role,
     };
 
     // Para saber si usuario existe en la base de datos

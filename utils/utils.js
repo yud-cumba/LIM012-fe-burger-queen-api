@@ -1,4 +1,6 @@
-const pagination = (pages, limits, result) => {
+const pagination = (pages, limits, result, table) => {
+  const port = process.argv[2] || process.env.PORT || 8080;
+
   const startIndex = (pages - 1) * limits;
   const endIndex = pages * limits;
   const usersQueryLimits = result.slice(startIndex, endIndex);
@@ -6,17 +8,16 @@ const pagination = (pages, limits, result) => {
   const previousPage = pages - 1;
   const nextPage = pages + 1;
 
-  const link = {
-    first: `/users?page=1&limit=${limits}`,
-    last: `/users?page=${totalPages}&limit=${limits}`,
-  };
-
+  let link = `<https://localhost:${port}/${table}?page=1&limit=${limits}>; rel="first",<https://localhost:${port}/${table}?page=${totalPages}&limit=${limits}>; rel="last"`;
   const results = {
     link,
   };
+
   if (pages > 0 && pages < (totalPages + 1)) {
-    link.prev = `/users?page=${previousPage}&limit=${limits}`;
-    link.next = `/users?page=${nextPage}&limit=${limits}`;
+    const prev = `,<https://localhost:${port}/${table}?page=${previousPage}&limit=${limits}>; rel="previous",`;
+    const next = `<https://localhost:${port}/${table}?page=${nextPage}&limit=${limits}>; rel="next"`;
+    link = link.concat(prev, next);
+    results.link = link;
     results.list = usersQueryLimits;
   } else if (!limits) {
     results.list = result;

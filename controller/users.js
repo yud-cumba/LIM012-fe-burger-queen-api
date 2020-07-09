@@ -9,7 +9,7 @@ module.exports = {
     const limits = Number(limit);
     pool.query(`SELECT * FROM ${table}`, (error, result) => {
       if (error) throw error;
-      const response = pagination(pages, limits, result);
+      const response = pagination(pages, limits, result, table);
       // console.log(response);
       resp.header('link', response.link);
       if (response.list) {
