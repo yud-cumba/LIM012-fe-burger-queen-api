@@ -157,7 +157,7 @@ module.exports = (app, next) => {
     // console.log(!password || password === '');// = TF = T
     // console.log(`condition ${condition}`);// T && T = 400
 
-    dataError(condition, !_req.headers.authorization, _next);
+    dataError(condition, !_req.headers.authorization, resp);
     // Para encriptar password
     const role = (roles) || false;
     const newUserdetails = {
