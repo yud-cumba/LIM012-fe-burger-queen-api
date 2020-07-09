@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
 const pool = require('../db-data/bq_data');
@@ -105,23 +106,24 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAdmin, (_req, _resp) => {
-    const { uid } = _req.params;
-    const { email } = _req.body;
-    dataError(!email || !uid, !_req.headers.authorization, _resp);
+  app.get('/users/:str', requireAdmin, (_req, _resp) => {
+    const { str } = _req.params;
 
-    getDataByKeyword('users', 'id', uid)
+    dataError(!str, !_req.headers.authorization, _resp);
+    const keyword = (str.includes('@')) ? 'email' : 'id';
+    getDataByKeyword('users', keyword, str)
       .then((result) => {
+        console.log(result);
         const admin = !!(result[0].rolesAdmin);
         return _resp.status(200).send(
           {
-            _id: uid,
+            _id: result[0].id,
             email: result[0].email,
             roles: { admin },
           },
         );
       })
-      .catch(() => _resp.status(404).send({ message: 'El producto solicitado no existe' }));
+      .catch(() => _resp.status(404).send({ message: 'User does not exist' }));
   });
 
   /**
@@ -146,13 +148,20 @@ module.exports = (app, next) => {
   app.post('/users', requireAdmin, async (_req, resp, _next) => {
     // Para verificar valores
     const { email, password, roles } = _req.body;
+    // eslint-disable-next-line no-console
+    const condition = (!email || email === '') && (!password || password === '');
+    // console.log(_req.body);
+    console.log(!email || email === '');// = FT = T
+    console.log(!password || password === '');// = TF = T
+    console.log(`condition ${condition}`);// T && T = 400
 
-    dataError(!email || !password, !_req.headers.authorization, resp);
+    dataError(condition, !_req.headers.authorization, _next);
     // Para encriptar password
+    const role = (!roles) ? 0 : 1;
     const newUserdetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
-    // rolesAdmin: roles.admin,
+      rolesAdmin: role,
     };
 
     // Para saber si usuario existe en la base de datos

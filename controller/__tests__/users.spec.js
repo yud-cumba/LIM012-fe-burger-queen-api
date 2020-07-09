@@ -1,9 +1,10 @@
-/* const {
+/* eslint-disable no-unused-vars */
+const {
   getData,
-} = require('../../controller/users');
+} = require('../users');
 
 describe('getUsers', () => {
   it('should get users collection', (done) => {
     done();
   });
-}); */
+});

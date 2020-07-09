@@ -10,12 +10,13 @@ module.exports = {
     pool.query(`SELECT * FROM ${table}`, (error, result) => {
       if (error) throw error;
       const response = pagination(pages, limits, result);
-      resp.header('Pagination', response.link);
+      // console.log(response);
+
+      resp.header('link', response.link);
       if (response.list) {
-        resp.status(200).send(response.list);
-      } else {
-        resp.status(404).send('Page not found');
+        return resp.status(200).send(response.list);
       }
+      return resp.status(404).send('Page not found');
     });
   },
 };

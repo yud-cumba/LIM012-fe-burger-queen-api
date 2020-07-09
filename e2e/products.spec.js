@@ -4,7 +4,6 @@ const {
   fetchAsAdmin,
 } = process;
 
-
 describe('POST /products', () => {
   it('should fail with 401 when no auth', () => (
     fetch('/products', { method: 'POST' })
@@ -37,7 +36,6 @@ describe('POST /products', () => {
       })
   ));
 });
-
 
 describe('GET /products', () => {
   it('should get products with Auth', () => (
@@ -90,7 +88,6 @@ describe('GET /products/:productid', () => {
   ));
 });
 
-
 describe('PUT /products/:productid', () => {
   it('should fail with 401 when no auth', () => (
     fetch('/products/xxx', { method: 'PUT' })
@@ -140,7 +137,7 @@ describe('PUT /products/:productid', () => {
   it('should update product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test1', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -154,10 +151,9 @@ describe('PUT /products/:productid', () => {
         expect(resp.status).toBe(200);
         return resp.json();
       })
-      .then((json) => expect(json.price).toBe(20))
+      .then((json) => expect(json.price).toBe(200))
   ));
 });
-
 
 describe('DELETE /products/:productid', () => {
   it('should fail with 401 when no auth', () => (
@@ -168,7 +164,7 @@ describe('DELETE /products/:productid', () => {
   it('should fail with 403 when not admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test3', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
