@@ -11,10 +11,32 @@ module.exports = {
       if (error) throw error;
       const response = pagination(pages, limits, result);
       // console.log(response);
-
       resp.header('link', response.link);
       if (response.list) {
-        return resp.status(200).send(response.list);
+        const jsonUserResp = response.list.map((x) => {
+          const role = (x.rolesAdmin) || false;
+          return {
+            _id: x.id,
+            email: x.email,
+            roles: { admin: role },
+          };
+        });
+        const jsonOrdersResp = response.list.map((x) => ({
+          _id: x.idProducts,
+          name: x.nameProduct,
+          price: x.price,
+          image: x.image,
+          type: x.typeProduct,
+          date: x.dateProduct,
+        }));
+        switch (table) {
+          case 'users':
+            return resp.status(200).send(jsonUserResp);
+          case 'products':
+            return resp.status(200).send(jsonOrdersResp);
+          default:
+            break;
+        }
       }
       return resp.status(404).send('Page not found');
     });

@@ -24,10 +24,11 @@ module.exports = (app, nextMain) => {
    */
   app.post('/auth', (req, resp, next) => {
     const { email, password } = req.body;
+    console.log(`TOKEN/ auth email:${email} ${password}`);
+
     if (!email || !password) {
       return next(400);
     }
-    console.log(`TOKEN/ auth email:${email} ${password}`);
     // TODO: autenticar a la usuarix
     try {
       pool.query('SELECT * FROM users', (error, result) => {
