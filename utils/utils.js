@@ -27,9 +27,10 @@ const pagination = (pagesNumber, limitsNumber, result, table) => {
 
 const dataError = (condicion, headers, _resp) => {
   if (condicion) {
-    return _resp.status(400);
+    console.log('error, fin');
+    return _resp.status(400).send('error');
   } if (headers) {
-    return _resp.status(401);
+    return _resp.status(401).send('error');
   }
 };
 

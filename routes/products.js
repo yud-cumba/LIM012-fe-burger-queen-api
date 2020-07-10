@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 const {
   requireAuth,
@@ -100,8 +101,10 @@ module.exports = (app, nextMain) => {
     const {
       name, price, image, type,
     } = req.body;
-
-    dataError(!(name && price), !req.headers.authorization, resp);
+    if (!(name && price) || !req.headers.authorization) {
+      // console.log(dataError(!(name && price), !req.headers.authorization, resp));
+      return dataError(!(name && price), !req.headers.authorization, resp);
+    }
     const date = new Date();
 
     const newProduct = {
@@ -111,7 +114,7 @@ module.exports = (app, nextMain) => {
       typeProduct: type,
       dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
-
+    console.log('no deberia estar aqui');
     getDataByKeyword('products', 'nameProduct', name)
       .then(() => resp.status(404).send({ message: `Ya existe un producto con el nombre: ${name}` }))
       .catch(() => {
