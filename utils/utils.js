@@ -1,6 +1,8 @@
-const pagination = (pagesNumber, limits, result, table) => {
+/* eslint-disable no-console */
+const pagination = (pagesNumber, limitsNumber, result, table) => {
   const port = process.argv[2] || process.env.PORT || 8080;
   const pages = (!pagesNumber) ? 1 : pagesNumber;
+  const limits = (!limitsNumber) ? result.length : limitsNumber;
   const startIndex = (pages - 1) * limits;
   const endIndex = pages * limits;
   const usersQueryLimits = result.slice(startIndex, endIndex);
@@ -14,16 +16,12 @@ const pagination = (pagesNumber, limits, result, table) => {
   };
 
   if (pages > 0 && pages < (totalPages + 1)) {
-    const prev = `,<https://localhost:${port}/${table}?page=${previousPage}&limit=${limits}>; rel="previous",`;
+    const prev = `,<https://localhost:${port}/${table}?page=${previousPage}&limit=${limits}>; rel="prev",`;
     const next = `<https://localhost:${port}/${table}?page=${nextPage}&limit=${limits}>; rel="next"`;
     link = link.concat(prev, next);
     results.link = link;
     results.list = usersQueryLimits;
-  } else if (!limits) {
-    results.list = result;
   }
-  // eslint-disable-next-line no-console
-  console.log(results.link);
   return results;
 };
 

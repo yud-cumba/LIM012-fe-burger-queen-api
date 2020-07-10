@@ -5,10 +5,6 @@ const url = require('url');
 const qs = require('querystring');
 const config = require('../config');
 
-console.log(url);
-
-console.log(qs);
-
 const {
   fetch,
   fetchAsTestUser,
@@ -55,9 +51,6 @@ describe('GET /users', () => {
         return resp.json().then((json) => ({ headers: resp.headers, json }));
       })
       .then(({ headers, json }) => {
-        // eslint-disable-next-line no-console
-        console.log(json);
-        console.log(headers.get('link'));
         const linkHeader = parseLinkHeader(headers.get('link'));
 
         const nextUrlObj = url.parse(linkHeader.next);
