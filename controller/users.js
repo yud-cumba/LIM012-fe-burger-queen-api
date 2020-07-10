@@ -16,7 +16,7 @@ module.exports = {
         const jsonUserResp = response.list.map((x) => {
           const role = (x.rolesAdmin) || false;
           return {
-            _id: x.id,
+            _id: (x.id).toString(),
             email: x.email,
             roles: { admin: role },
           };
