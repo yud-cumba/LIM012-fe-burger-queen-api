@@ -45,9 +45,6 @@ describe('GET /users', () => {
     fetchAsAdmin('/users?limit=1')
       .then((resp) => {
         expect(resp.status).toBe(200);
-        // eslint-disable-next-line no-console
-        console.log(Object.keys(resp));
-        console.log(resp.headers);
         return resp.json().then((json) => ({ headers: resp.headers, json }));
       })
       .then(({ headers, json }) => {

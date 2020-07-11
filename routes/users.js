@@ -214,14 +214,15 @@ module.exports = (app, next) => {
     const { email, password, roles } = _req.body;
 
     if (!str || !_req.headers.authorization) {
-      console.log(_req.headers.authorization);
+      // console.log(_req.headers.authorization);
       return dataError(!str, !_req.headers.authorization, _resp);
     }
-    // Para saber si no es ni admin o la misma usuaria
-    if (_req.user.id === Number(str) || _req.user.rolesAdmin !== 1) {
-      console.log(`soy ${_req.user.email} admin: ${_req.user.rolesAdmin}`);
-      return _resp.status(403).send({ message: 'You do not have enough permissions' });
-    }
+    // console.log(typeof str);
+    // console.log(_req.body);
+
+    // ifclient !== str denied permitions unless client is admin
+    const keyword = (str.includes('@')) ? 'email' : 'id';
+    const strDatatype = (keyword === 'id') ? Number(str) : str;
 
     const validateEmail = validate(email);
     const validatePassword = valPassword(password);
@@ -230,18 +231,22 @@ module.exports = (app, next) => {
 
     const role = roles ? roles.admin : false;
 
-    if (email && validateEmail) {
-      updatedDetails.email = email;
-      updatedDetails.rolesAdmin = role;
-    } else if (password && validatePassword) {
-      updatedDetails.password = bcrypt.hashSync(password, 10);// ERROR 500 SALT
-      updatedDetails.rolesAdmin = role;
+    if ((_req.user.rolesAdmin === 1 || _req.user[keyword] === strDatatype)) {
+      if (email && validateEmail) {
+        updatedDetails.email = email;
+        updatedDetails.rolesAdmin = role;
+      } else if (password && validatePassword) {
+        updatedDetails.password = bcrypt.hashSync(password, 10);// ERROR 500 SALT
+        updatedDetails.rolesAdmin = role;
+      } else {
+        // NO propiedades
+        const noprops = !(Object.keys(_req.body).length);
+        return dataError(noprops, !_req.headers.authorization, _resp);
+      }
     } else {
-      // NO propiedades
-      return dataError(!str, !_req.headers.authorization, _resp);
+      return _resp.status(403).send({ mensaje: 'Admin required' });
     }
 
-    const keyword = (str.includes('@')) ? 'email' : 'id';
     console.log(keyword);
     getDataByKeyword('users', keyword, str)
       .then((user) => {
