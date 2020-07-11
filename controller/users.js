@@ -15,20 +15,24 @@ module.exports = {
       if (response.list) {
         const jsonUserResp = response.list.map((x) => {
           const role = (x.rolesAdmin) || false;
+          const id = (!x.id) ? 0 : (x.id).toString();
           return {
-            _id: x.id,
+            _id: id,
             email: x.email,
             roles: { admin: role },
           };
         });
-        const jsonProductsResp = response.list.map((x) => ({
-          _id: x.idProducts, // add toString();
-          name: x.nameProduct,
-          price: x.price,
-          image: x.image,
-          type: x.typeProduct,
-          date: x.dateProduct,
-        }));
+        const jsonProductsResp = response.list.map((x) => {
+          const id = (!x.idProducts) ? 0 : (x.idProducts).toString();
+          return {
+            _id: id, // add toString();
+            name: x.nameProduct,
+            price: x.price,
+            image: x.image,
+            type: x.typeProduct,
+            date: x.dateProduct,
+          };
+        });
         // eslint-disable-next-line no-console
         switch (table) {
           case 'users':

@@ -16,6 +16,11 @@ const {
 
 const { dataError } = require('../utils/utils');
 
+const {
+  validate,
+  valPassword,
+} = require('../utils/validators');
+
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
@@ -106,19 +111,23 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:str', requireAdmin, (_req, _resp) => {
+  app.get('/users/:str', requireAdmin && requireAuth, (_req, _resp) => {
     const { str } = _req.params;
-
-    dataError(!str, !_req.headers.authorization, _resp);
-
+    // console.log(`test get /users/:str  Obtiene información de una usuaria ${str}`);
+    if (!str || !_req.headers.authorization) {
+      return dataError(!str, !_req.headers.authorization, _resp);
+    }
     const keyword = (str.includes('@')) ? 'email' : 'id';
+    if (!((_req.user[keyword]).toString() === str || _req.user.rolesAdmin)) {
+      return _resp.status(403).send({ message: 'You do not have enough permissions' });
+    }
+
     getDataByKeyword('users', keyword, str)
       .then((result) => {
-        console.log(result);
         const admin = !!(result[0].rolesAdmin);
         return _resp.status(200).send(
           {
-            _id: result[0].id,
+            _id: (result[0].id).toString(),
             email: result[0].email,
             roles: { admin },
           },
@@ -146,25 +155,23 @@ module.exports = (app, next) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {403} si ya existe usuaria con ese `email`
    */
-  app.post('/users', requireAdmin, async (_req, resp, _next) => {
+  app.post('/users', requireAdmin, (_req, resp, _next) => {
     // Para verificar valores
     const { email, password, roles } = _req.body;
-    // eslint-disable-next-line no-console
-    const condition = (!email || email === '') && (!password || password === '');
-    // console.log(_req.body);
-    // console.log(!email || email === '');// = FT = T
-    // console.log(!password || password === '');// = TF = T
-    // console.log(`condition ${condition}`);// T && T = 400
 
-    dataError(condition, !_req.headers.authorization, resp);
-    // Para encriptar password
-    // const role = (roles.admin === true);
+    const validateInput = validate(email) && valPassword(password);
+    if (!(email && password) || !_req.headers.authorization) {
+      return dataError(!(email && password), !_req.headers.authorization, resp);
+    } if (!validateInput) {
+      return resp.status(400).send({ mensaje: 'Invalid email or password' });
+    }
+
+    const role = roles ? roles.admin : false;
     const newUserdetails = {
       email,
       userpassword: bcrypt.hashSync(password, 10),
-      // rolesAdmin: role,
+      rolesAdmin: role,
     };
-
     // Para saber si usuario existe en la base de datos
 
     getDataByKeyword('users', 'email', email)
@@ -173,8 +180,8 @@ module.exports = (app, next) => {
         postData('users', newUserdetails)
           .then((result) => resp.status(200).send(
             {
-              _id: result.insertId,
-              user: newUserdetails.email,
+              _id: (result.insertId).toString(),
+              email: newUserdetails.email,
               roles: { admin: newUserdetails.rolesAdmin },
             },
           ));
@@ -202,31 +209,58 @@ module.exports = (app, next) => {
    * @code {403} una usuaria no admin intenta de modificar sus `roles`
    * @code {404} si la usuaria solicitada no existe
    */
-  app.put('/users/:uid', requireAdmin && requireAuth, (_req, _resp, _next) => {
-    const { uid } = _req.params;
+  app.put('/users/:str', requireAdmin && requireAuth, (_req, _resp, _next) => {
+    const { str } = _req.params;
     const { email, password, roles } = _req.body;
-    dataError(!email || !uid, !_req.headers.authorization, _resp);
-    if (!(_req.user.id === Number(uid) || _req.user.rolesAdmin)) {
+
+    if (!str || !_req.headers.authorization) {
+      console.log(_req.headers.authorization);
+      return dataError(!str, !_req.headers.authorization, _resp);
+    }
+    // Para saber si no es ni admin o la misma usuaria
+    if (_req.user.id === Number(str) || _req.user.rolesAdmin !== 1) {
+      console.log(`soy ${_req.user.email} admin: ${_req.user.rolesAdmin}`);
       return _resp.status(403).send({ message: 'You do not have enough permissions' });
     }
-    const updateDetails = {
-      email,
-      userpassword: bcrypt.hashSync(password, 10),
-      rolesAdmin: roles.admin,
-    };
 
-    getDataByKeyword('users', 'id', uid)
-      .then(() => {
-        updateDataByKeyword('users', updateDetails, 'id', uid);
-        return _resp.status(200).send(
-          {
-            _id: uid,
-            user: updateDetails.email,
-            roles: { admin: updateDetails.rolesAdmin },
-          },
-        );
+    const validateEmail = validate(email);
+    const validatePassword = valPassword(password);
+
+    const updatedDetails = {};
+
+    const role = roles ? roles.admin : false;
+
+    if (email && validateEmail) {
+      updatedDetails.email = email;
+      updatedDetails.rolesAdmin = role;
+    } else if (password && validatePassword) {
+      updatedDetails.password = bcrypt.hashSync(password, 10);// ERROR 500 SALT
+      updatedDetails.rolesAdmin = role;
+    } else {
+      // NO propiedades
+      return dataError(!str, !_req.headers.authorization, _resp);
+    }
+
+    const keyword = (str.includes('@')) ? 'email' : 'id';
+    console.log(keyword);
+    getDataByKeyword('users', keyword, str)
+      .then((user) => {
+        const userID = (user[0].id).toString();
+        if (user) {
+          updateDataByKeyword('users', updatedDetails, keyword, str)
+            .then((result) => {
+              console.log(result);
+              return _resp.status(200).send(
+                {
+                  _id: userID,
+                  user: updatedDetails.email,
+                  roles: { admin: updatedDetails.rolesAdmin },
+                },
+              );
+            });
+        }
       })
-      .catch(() => _resp.status(404).send({ message: `El usuario con id ${uid} no existe.` }));
+      .catch(() => _resp.status(404).send({ message: `El usuario con id ${str} no existe.` }));
   });
 
   /**
@@ -245,23 +279,33 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.delete('/users/:uid', requireAdmin, async (_req, _resp, _next) => {
-    const { uid } = _req.params;
+  app.delete('/users/:str', requireAdmin && requireAuth, (_req, _resp, _next) => {
+    const { str } = _req.params;
+    console.log(`test DELETE /users/:uid Elimina una usuaria ${str}`);
     // const { email } = _req.body;
     // dataError(!email || !uid, !_req.headers.authorization, _resp);
+    if (!str || !_req.headers.authorization) {
+      // console.log(dataError(!(name && price), !req.headers.authorization, resp));
+      return dataError(!str, !_req.headers.authorization, _resp);
+    }
+
+    const keyword = (str.includes('@')) ? 'email' : 'id';
+    if (!((_req.user[keyword]).toString() === str || _req.user.rolesAdmin)) {
+      return _resp.status(403).send({ message: 'You do not have enough permissions' });
+    }
     const userDeleted = {
-      _id: uid,
+      _id: str,
     };
 
-    getDataByKeyword('users', 'id', uid)
+    getDataByKeyword('users', keyword, str)
       .then((user) => {
         const admin = !!(user[0].rolesAdmin);
-        userDeleted.user = user[0].email;
+        userDeleted.email = user[0].email;
         userDeleted.roles = { admin };
-        deleteData('users', 'id', uid);
+        deleteData('users', keyword, str);
         _resp.status(200).send(userDeleted);
       })
-      .catch(() => _resp.status(403).send({ message: `No existe el usuario con id ${uid}` }));
+      .catch(() => _resp.status(404).send({ message: `No existe el usuario con id ${str}` }));
   });
   initAdminUser(app, next);
 };

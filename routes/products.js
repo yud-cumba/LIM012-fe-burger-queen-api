@@ -167,8 +167,6 @@ module.exports = (app, nextMain) => {
       name, price, image, type,
     } = req.body;
     const date = new Date();
-    console.log(!(name || price || image || type));
-    console.log(price);
     if (!(name || price || image || type) || !req.headers.authorization) {
       console.log(':v');
       return dataError(!(name && price), !req.headers.authorization, resp);
