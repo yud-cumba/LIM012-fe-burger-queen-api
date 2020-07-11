@@ -59,19 +59,25 @@ module.exports = (app, nextMain) => {
    */
   app.get('/products/:id', requireAuth, (req, resp, next) => {
     const { id } = req.params;
-    dataError(!id, !req.headers.authorization, resp);
-
+    if (!(id) || !req.headers.authorization) {
+      // dataError(!id, !req.headers.authorization, resp);
+      return dataError(!id, !req.headers.authorization, resp);
+    }
     getDataByKeyword('products', 'idProducts', id)
-      .then((result) => resp.status(200).send(
-        {
-          _id: result[0].idProducts,
-          name: result[0].nameProduct,
-          price: result[0].price,
-          image: result[0].image,
-          type: result[0].typeProduct,
-          date: result[0].dateProduct,
-        },
-      ))
+      .then((result) => {
+        console.log(typeof (result[0].idProducts).toString());
+        console.log(typeof result[0].price);
+        return resp.status(200).send(
+          {
+            _id: (result[0].idProducts).toString(),
+            name: result[0].nameProduct,
+            price: result[0].price,
+            image: result[0].image,
+            type: result[0].typeProduct,
+            date: result[0].dateProduct,
+          },
+        );
+      })
       .catch(() => resp.status(404).send({ message: 'El producto solicitado no existe' }));
   });
 
@@ -114,14 +120,13 @@ module.exports = (app, nextMain) => {
       typeProduct: type,
       dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
-    console.log('no deberia estar aqui');
     getDataByKeyword('products', 'nameProduct', name)
       .then(() => resp.status(404).send({ message: `Ya existe un producto con el nombre: ${name}` }))
       .catch(() => {
         postData('products', newProduct)
           .then((result) => resp.status(200).send(
             {
-              _id: result.insertId,
+              _id: (result.insertId).toString(),
               name: newProduct.nameProduct,
               price,
               image,
@@ -161,32 +166,46 @@ module.exports = (app, nextMain) => {
     const {
       name, price, image, type,
     } = req.body;
-    dataError(!name || !price, !req.headers.authorization, resp);
     const date = new Date();
-
+    console.log(!(name || price || image || type));
+    console.log(price);
+    if (!(name || price || image || type) || !req.headers.authorization) {
+      console.log(':v');
+      return dataError(!(name && price), !req.headers.authorization, resp);
+    // eslint-disable-next-line no-restricted-globals
+    } if (isNaN(price) && price !== undefined) {
+      return resp.status(400).send('Price have to do a number');
+    }
     const newProduct = {
-      nameProduct: name,
-      price,
-      image,
-      typeProduct: type,
       dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
-
+    if (name) {
+      newProduct.nameProduct = name;
+    } if (type) {
+      newProduct.typeProduct = type;
+    } if (price) {
+      newProduct.price = price;
+    } if (image) {
+      newProduct.image = image;
+    }
     getDataByKeyword('products', 'idProducts', id)
       .then((product) => {
-        updateDataByKeyword('products', newProduct, 'idProducts', id);
-        return resp.status(200).send(
-          {
-            _id: id,
-            name: product.nameProduct,
-            price,
-            image,
-            type,
-            date: product.dateProduct,
-          },
-        );
+        updateDataByKeyword('products', newProduct, 'idProducts', id)
+          .then(() => {
+            getDataByKeyword('products', 'idProducts', id)
+              .then((product) => resp.status(200).send(
+                {
+                  _id: id.toString(),
+                  name: product[0].nameProduct,
+                  price: product[0].price,
+                  image: product[0].image,
+                  type: product[0].typeProduct,
+                  date: newProduct.dateProduct,
+                },
+              ));
+          });
       })
-      .catch(() => resp.status(404).send({ message: `No existe producto con ese nombre : ${name}` }));
+      .catch(() => resp.status(404).send({ message: `No existe producto con ese id : ${id}` }));
   });
 
   /**
@@ -209,7 +228,10 @@ module.exports = (app, nextMain) => {
    */
   app.delete('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
-    dataError(!id, !req.headers.authorization, resp);
+    if (!id || !req.headers.authorization) {
+      // console.log(dataError(!(name && price), !req.headers.authorization, resp));
+      return dataError(!id, !req.headers.authorization, resp);
+    }
     const productDeleted = {
       _id: id,
     };

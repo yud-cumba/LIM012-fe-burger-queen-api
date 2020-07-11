@@ -1,3 +1,7 @@
+jest.setTimeout(500000);
+
+const { getDataByKeyword } = require('../db-data/sql_functions');
+
 const {
   fetch,
   fetchAsTestUser,
@@ -23,7 +27,7 @@ describe('POST /products', () => {
   it('should create product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 5 },
+      body: { name: 'POSTtest', price: 5 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -33,6 +37,12 @@ describe('POST /products', () => {
         expect(typeof json._id).toBe('string');
         expect(typeof json.name).toBe('string');
         expect(typeof json.price).toBe('number');
+        return json._id;
+      })
+      .then((id) => {
+        fetchAsAdmin(`/products/${id}`, {
+          method: 'DELETE',
+        });
       })
   ));
 });
@@ -71,6 +81,8 @@ describe('GET /products/:productid', () => {
         expect(Array.isArray(json)).toBe(true);
         expect(json.length > 0).toBe(true);
         json.forEach((product) => {
+          // eslint-disable-next-line no-console
+          console.log(product._id);
           expect(typeof product._id).toBe('string');
           expect(typeof product.name).toBe('string');
           expect(typeof product.price).toBe('number');
@@ -97,7 +109,7 @@ describe('PUT /products/:productid', () => {
   it('should fail with 403 when not admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'testYud', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -108,9 +120,17 @@ describe('PUT /products/:productid', () => {
         body: { price: 20 },
       }))
       .then((resp) => expect(resp.status).toBe(403))
+      .then(() => getDataByKeyword('products', 'name', 'test'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0].idProducts}`, {
+          method: 'DELETE',
+        });
+      })
+      // borrar
+      // deleteData('products','name','test');
   ));
 
-  it('should fail with 404 when admin and not found', () => (
+  it('should fail with 404 when product not found', () => (
     fetchAsAdmin('/products/12345678901234567890', {
       method: 'PUT',
       body: { price: 1 },
@@ -121,7 +141,7 @@ describe('PUT /products/:productid', () => {
   it('should fail with 400 when bad props', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'BadPropTest138jdd', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -137,7 +157,7 @@ describe('PUT /products/:productid', () => {
   it('should update product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test1', price: 10 },
+      body: { name: 'UpdateTest81sdkdd', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -164,7 +184,7 @@ describe('DELETE /products/:productid', () => {
   it('should fail with 403 when not admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test3', price: 10 },
+      body: { name: 'TestFails200kdd', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -182,7 +202,7 @@ describe('DELETE /products/:productid', () => {
   it('should delete other product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'TestDelete29sdd', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);

@@ -21,19 +21,20 @@ module.exports = {
             roles: { admin: role },
           };
         });
-        const jsonOrdersResp = response.list.map((x) => ({
-          _id: x.idProducts,
+        const jsonProductsResp = response.list.map((x) => ({
+          _id: x.idProducts, // add toString();
           name: x.nameProduct,
           price: x.price,
           image: x.image,
           type: x.typeProduct,
           date: x.dateProduct,
         }));
+        // eslint-disable-next-line no-console
         switch (table) {
           case 'users':
             return resp.status(200).send(jsonUserResp);
           case 'products':
-            return resp.status(200).send(jsonOrdersResp);
+            return resp.status(200).send(jsonProductsResp);
           default:
             break;
         }
