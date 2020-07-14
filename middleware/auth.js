@@ -14,18 +14,17 @@ module.exports = (secret) => (req, resp, next) => {
     return next();
   }
 
-  jwt.verify(token, secret, async (err, decodedToken) => {
+  jwt.verify(token, secret, (err, decodedToken) => {
     if (err) {
       return next(403);
     }
     // TODO: Verificar identidad del usuario usando `decodedToken.uid`
     try {
-      await pool.query('SELECT * FROM users', (error, result) => {
+      pool.query('SELECT * FROM users', (error, result) => {
         if (error) { throw error; }
         const userVerified = result.find((user) => user.email === decodedToken.email);
         if (userVerified) {
           req.user = userVerified;
-          // console.log(`middleware decode token ${req.user}`);
           next();
         } else { next(404); }
       });

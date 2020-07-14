@@ -1,8 +1,17 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
 const {
   requireAuth,
 } = require('../middleware/auth');
-const pool = require('../db-data/bq_data');
+const { getData } = require('../controller/users');
+const {
+  getDataByKeyword, postData, updateDataByKeyword, deleteData,
+} = require('../db-data/sql_functions');
+
+const { getAllData } = require('../db-data/sql_functions');
+
+const { dataError } = require('../utils/utils');
+
 /** @module orders */
 module.exports = (app, nextMain) => {
   /**
@@ -31,14 +40,7 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
-  /* app.get('/orders', requireAuth, (req, resp, next) => {
-  }); */
-  app.get('/orders', (request, response) => {
-    pool.query('SELECT * FROM orders', (error, result) => {
-      if (error) throw error;
-      response.send(result);
-    });
-  });
+  app.get('/orders', requireAuth, (req, resp, next) => getData(req, resp, next, 'orders'));
   /**
    * @name GET /orders/:orderId
    * @description Obtiene los datos de una orden especifico
@@ -61,6 +63,22 @@ module.exports = (app, nextMain) => {
    * @code {404} si la orden con `orderId` indicado no existe
    */
   app.get('/orders/:orderId', requireAuth, (req, resp, next) => {
+    const { orderId } = req.params;
+    if (!orderId || !req.headers.authorization) {
+      return dataError(!orderId, !req.headers.authorization, resp);
+    }
+    getDataByKeyword('orders', '_id', orderId)
+      .then((result) => getAllData('products')
+        .then((products) => {
+          const listOfProducts = products.map((product) => ({
+            qty: products.length,
+            product,
+          }));
+          result[0]._id = orderId.toString();
+          result[0].products = listOfProducts;
+          return resp.status(200).send(result[0]);
+        }))
+      .catch(() => resp.status(404).send({ message: 'El producto solicitado no existe' }));
   });
 
   /**

@@ -1,4 +1,4 @@
-jest.setTimeout(50000);
+jest.setTimeout(500000);
 
 /* eslint-disable no-console */
 const url = require('url');
@@ -45,9 +45,6 @@ describe('GET /users', () => {
     fetchAsAdmin('/users?limit=1')
       .then((resp) => {
         expect(resp.status).toBe(200);
-        // eslint-disable-next-line no-console
-        console.log(Object.keys(resp));
-        console.log(resp.headers);
         return resp.json().then((json) => ({ headers: resp.headers, json }));
       })
       .then(({ headers, json }) => {
@@ -291,7 +288,7 @@ describe('DELETE /users/:uid', () => {
   ));
 
   it('should delete own user', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234' };
+    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '123456' };
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetch('/auth', { method: 'POST', body: credentials }))
@@ -308,7 +305,7 @@ describe('DELETE /users/:uid', () => {
   });
 
   it('should delete other user as admin', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234' };
+    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '123456' };
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetchAsAdmin(`/users/${credentials.email}`, { method: 'DELETE' }))

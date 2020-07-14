@@ -63,20 +63,11 @@ module.exports = (app, nextMain) => {
       // dataError(!id, !req.headers.authorization, resp);
       return dataError(!id, !req.headers.authorization, resp);
     }
-    getDataByKeyword('products', 'idProducts', id)
+    getDataByKeyword('products', '_id', id)
       .then((result) => {
-        console.log(typeof (result[0].idProducts).toString());
-        console.log(typeof result[0].price);
-        return resp.status(200).send(
-          {
-            _id: (result[0].idProducts).toString(),
-            name: result[0].nameProduct,
-            price: result[0].price,
-            image: result[0].image,
-            type: result[0].typeProduct,
-            date: result[0].dateProduct,
-          },
-        );
+        // eslint-disable-next-line no-param-reassign
+        result[0]._id = id.toString();
+        return resp.status(200).send(result[0]);
       })
       .catch(() => resp.status(404).send({ message: 'El producto solicitado no existe' }));
   });
@@ -108,32 +99,26 @@ module.exports = (app, nextMain) => {
       name, price, image, type,
     } = req.body;
     if (!(name && price) || !req.headers.authorization) {
-      // console.log(dataError(!(name && price), !req.headers.authorization, resp));
       return dataError(!(name && price), !req.headers.authorization, resp);
     }
     const date = new Date();
 
     const newProduct = {
-      nameProduct: name,
+      name,
       price,
       image,
-      typeProduct: type,
-      dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+      type,
+      date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
-    getDataByKeyword('products', 'nameProduct', name)
+    getDataByKeyword('products', 'name', name)
       .then(() => resp.status(404).send({ message: `Ya existe un producto con el nombre: ${name}` }))
       .catch(() => {
         postData('products', newProduct)
-          .then((result) => resp.status(200).send(
-            {
-              _id: (result.insertId).toString(),
-              name: newProduct.nameProduct,
-              price,
-              image,
-              type,
-              date: newProduct.dateProduct,
-            },
-          ));
+          .then((result) => {
+            // eslint-disable-next-line no-param-reassign
+            newProduct._id = (result.insertId).toString();
+            return resp.status(200).send(newProduct);
+          });
       });
   });
 
@@ -168,39 +153,33 @@ module.exports = (app, nextMain) => {
     } = req.body;
     const date = new Date();
     if (!(name || price || image || type) || !req.headers.authorization) {
-      console.log(':v');
-      return dataError(!(name && price), !req.headers.authorization, resp);
+      return dataError(!(name || price || image || type), !req.headers.authorization, resp);
     // eslint-disable-next-line no-restricted-globals
     } if (isNaN(price) && price !== undefined) {
       return resp.status(400).send('Price have to do a number');
     }
     const newProduct = {
-      dateProduct: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+      date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
     if (name) {
-      newProduct.nameProduct = name;
+      newProduct.name = name;
     } if (type) {
-      newProduct.typeProduct = type;
+      newProduct.type = type;
     } if (price) {
       newProduct.price = price;
     } if (image) {
       newProduct.image = image;
     }
-    getDataByKeyword('products', 'idProducts', id)
+    getDataByKeyword('products', '_id', id)
       .then((product) => {
-        updateDataByKeyword('products', newProduct, 'idProducts', id)
+        updateDataByKeyword('products', newProduct, '_id', id)
           .then(() => {
-            getDataByKeyword('products', 'idProducts', id)
-              .then((product) => resp.status(200).send(
-                {
-                  _id: id.toString(),
-                  name: product[0].nameProduct,
-                  price: product[0].price,
-                  image: product[0].image,
-                  type: product[0].typeProduct,
-                  date: newProduct.dateProduct,
-                },
-              ));
+            getDataByKeyword('products', '_id', id)
+              .then((product) => {
+                // eslint-disable-next-line no-param-reassign
+                product[0]._id = id.toString();
+                return resp.status(200).send(product[0]);
+              });
           });
       })
       .catch(() => resp.status(404).send({ message: `No existe producto con ese id : ${id}` }));
@@ -227,21 +206,14 @@ module.exports = (app, nextMain) => {
   app.delete('/products/:id', requireAdmin, (req, resp, next) => {
     const { id } = req.params;
     if (!id || !req.headers.authorization) {
-      // console.log(dataError(!(name && price), !req.headers.authorization, resp));
       return dataError(!id, !req.headers.authorization, resp);
     }
-    const productDeleted = {
-      _id: id,
-    };
-    getDataByKeyword('products', 'idProducts', id)
+    getDataByKeyword('products', '_id', id)
       .then((product) => {
-        productDeleted.name = product[0].nameProduct;
-        productDeleted.price = product[0].price;
-        productDeleted.image = product[0].image;
-        productDeleted.type = product[0].typeProduct;
-        productDeleted.dateEntry = product[0].dateProduct;
-        deleteData('products', 'idProducts', id);
-        return resp.status(200).send(productDeleted);
+        deleteData('products', '_id', id);
+        // eslint-disable-next-line no-param-reassign
+        product[0]._id = id.toString();
+        return resp.status(200).send(product[0]);
         // resp.status(403).send({ message: `El producto con id ${id} no existe.` });
       })
       .catch(() => resp.status(404).send({ message: `No existe el producto con id ${id}.` }));

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-jest.setTimeout(500000);
+jest.setTimeout(1000000);
 
 const { getDataByKeyword } = require('../db-data/sql_functions');
 
@@ -41,7 +41,6 @@ describe('POST /products', () => {
         return json._id;
       })
       .then((id) => {
-        console.log(id);
         fetchAsAdmin(`/products/${id}`, {
           method: 'DELETE',
         });
@@ -83,8 +82,6 @@ describe('GET /products/:productid', () => {
         expect(Array.isArray(json)).toBe(true);
         expect(json.length > 0).toBe(true);
         json.forEach((product) => {
-          // eslint-disable-next-line no-console
-          console.log(product._id);
           expect(typeof product._id).toBe('string');
           expect(typeof product.name).toBe('string');
           expect(typeof product.price).toBe('number');
@@ -111,7 +108,7 @@ describe('PUT /products/:productid', () => {
   it('should fail with 403 when not admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'test1', price: 10 },
+      body: { name: 'test5', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -122,10 +119,9 @@ describe('PUT /products/:productid', () => {
         body: { price: 20 },
       }))
       .then((resp) => expect(resp.status).toBe(403))
-      .then(() => getDataByKeyword('products', 'nameProduct', 'test1'))
+      .then(() => getDataByKeyword('products', 'name', 'test5'))
       .then((data) => {
-        console.log(data[0].idProducts);
-        fetchAsAdmin(`/products/${data[0].idProducts}`, {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
           method: 'DELETE',
         });
       })
@@ -155,10 +151,9 @@ describe('PUT /products/:productid', () => {
         body: { price: 'abc' },
       }))
       .then((resp) => expect(resp.status).toBe(400))
-      .then(() => getDataByKeyword('products', 'nameProduct', 'test2'))
+      .then(() => getDataByKeyword('products', 'name', 'test2'))
       .then((data) => {
-        console.log(data[0].idProducts);
-        fetchAsAdmin(`/products/${data[0].idProducts}`, {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
           method: 'DELETE',
         });
       })
@@ -182,10 +177,9 @@ describe('PUT /products/:productid', () => {
         return resp.json();
       })
       .then((json) => expect(json.price).toBe(20))
-      .then(() => getDataByKeyword('products', 'nameProduct', 'test3'))
+      .then(() => getDataByKeyword('products', 'name', 'test3'))
       .then((data) => {
-        console.log(data[0].idProducts);
-        fetchAsAdmin(`/products/${data[0].idProducts}`, {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
           method: 'DELETE',
         });
       })
@@ -209,10 +203,9 @@ describe('DELETE /products/:productid', () => {
       })
       .then((json) => fetchAsTestUser(`/products/${json._id}`, { method: 'DELETE' }))
       .then((resp) => expect(resp.status).toBe(403))
-      .then(() => getDataByKeyword('products', 'nameProduct', 'test4'))
+      .then(() => getDataByKeyword('products', 'name', 'test4'))
       .then((data) => {
-        console.log(data[0].idProducts);
-        fetchAsAdmin(`/products/${data[0].idProducts}`, {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
           method: 'DELETE',
         });
       })

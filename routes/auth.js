@@ -23,8 +23,6 @@ module.exports = (app, nextMain) => {
    */
   app.post('/auth', (req, resp, next) => {
     const { email, password } = req.body;
-    console.log(`TOKEN/ auth email:${email} ${password}`);
-
     if (!email || !password) {
       return next(400);
     }
@@ -33,9 +31,9 @@ module.exports = (app, nextMain) => {
       pool.query('SELECT * FROM users', (error, result) => {
         if (error) throw error;
         // eslint-disable-next-line max-len
-        const payload = result.find((user) => user.email === email && bcrypt.compareSync(password, user.userpassword));
+        const payload = result.find((user) => user.email === email && bcrypt.compareSync(password, user.password));
         if (payload) {
-          const token = jwt.sign({ email: payload.email, password: payload.userpassword }, secret);
+          const token = jwt.sign({ email: payload.email, password: payload.password }, secret);
           resp.header('authorization', token);
           resp.status(200).send({ message: 'succesful', token });
         } else {
