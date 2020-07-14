@@ -1,3 +1,5 @@
+jest.setTimeout(1000000);
+
 const {
   fetch,
   fetchAsTestUser,
