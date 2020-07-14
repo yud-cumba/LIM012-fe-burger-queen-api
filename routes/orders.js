@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
 const {
@@ -67,12 +68,13 @@ module.exports = (app, nextMain) => {
     if (!orderId || !req.headers.authorization) {
       return dataError(!orderId, !req.headers.authorization, resp);
     }
+    console.log(`hola, soy ${orderId}`);
     getDataByKeyword('orders', '_id', orderId)
-      .then((result) => getAllData('products')
+      .then((result) => getDataByKeyword('orders_products', 'orderId', orderId)
         .then((products) => {
-          const listOfProducts = products.map((product) => ({
-            qty: products.length,
-            product,
+          const listOfProducts = products.map((productObj) => ({
+            qty: productObj.qty,
+            product: productObj.product,
           }));
           result[0]._id = orderId.toString();
           result[0].products = listOfProducts;
@@ -108,6 +110,35 @@ module.exports = (app, nextMain) => {
    * @code {401} si no hay cabecera de autenticación
    */
   app.post('/orders', requireAuth, (req, resp, next) => {
+    const {
+      userId, client, products,
+    } = req.body;
+    if ((!userId || !products) || !req.headers.authorization) {
+      return dataError((!userId || !products), !req.headers.authorization, resp);
+    }
+    const date = new Date();
+
+    const newOrder = {
+      userId: Number(userId),
+      client,
+      status: 'pending',
+      dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+    };
+    postData('orders', newOrder)
+      .then((result) => {
+        products.forEach((productObj) => {
+          console.log(productObj);
+          const newOrderProduct = {
+            orderId: result.insertId,
+            qty: productObj.qty,
+            product: productObj.product.name,
+          };
+          postData('orders_products', newOrderProduct);
+        });
+        newOrder._id = (result.insertId).toString();
+        newOrder.products = products;
+        return resp.status(200).send(newOrder);
+      });
   });
 
   /**
@@ -163,6 +194,17 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `orderId` indicado no existe
    */
   app.delete('/orders/:orderId', requireAuth, (req, resp, next) => {
+    const { orderId } = req.params;
+    if (!orderId || !req.headers.authorization) {
+      return dataError(!orderId, !req.headers.authorization, resp);
+    }
+    getDataByKeyword('orders', '_id', orderId)
+      .then((order) => {
+        deleteData('orders', '_id', orderId);
+        order[0]._id = orderId.toString();
+        return resp.status(200).send(order[0]);
+      })
+      .catch(() => resp.status(404).send({ message: `No existe el producto con id ${orderId}.` }));
   });
 
   nextMain();

@@ -34,11 +34,11 @@ module.exports = {
             case 'products':
               return resp.status(200).send(jsonProductResp);
             case 'orders':
-              return getAllData('products')
+              return getAllData('orders_products')
                 .then((products) => {
-                  const listOfProducts = products.map((product) => ({
-                    qty: products.length,
-                    product,
+                  const listOfProducts = products.map((productObj) => ({
+                    qty: productObj.qty,
+                    product: productObj.product,
                   }));
                   const jsonOrderResp = response.list.map((x) => {
                     x._id = (!x._id) ? 0 : (x._id).toString();
