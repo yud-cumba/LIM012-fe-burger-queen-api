@@ -35,7 +35,7 @@ const initAdminUser = (app, next) => {
   };
   // TODO: crear usuaria admin
   pool.query('SELECT * from users', (error, result) => {
-    console.log(result);
+    // console.log(result);
     if (!result) {
       pool.query('INSERT INTO users SET ?', adminUser, (error, result) => {
         if (error) throw error;
@@ -225,7 +225,6 @@ module.exports = (app, next) => {
     const validatePassword = valPassword(password);
 
     const updatedDetails = {};
-
     const role = roles ? roles.admin : false;
 
     if (email && validateEmail) {

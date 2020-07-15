@@ -127,18 +127,24 @@ module.exports = (app, nextMain) => {
     postData('orders', newOrder)
       .then((result) => {
         products.forEach((productObj) => {
-          console.log(productObj);
+          // console.log(productObj.product);
           const newOrderProduct = {
             orderId: result.insertId,
             qty: productObj.qty,
-            product: productObj.product.name,
+            productId: productObj.productId,
           };
           postData('orders_products', newOrderProduct);
+          const dataProduct = products.forEach((p) => {
+            const productID = p.productId;
+            // console.log(productID);
+            return getDataByKeyword('products', '_id', productID);
+          });
         });
         newOrder._id = (result.insertId).toString();
         newOrder.products = products;
         return resp.status(200).send(newOrder);
-      });
+      })
+      .catch((error) => console.error(error));
   });
 
   /**

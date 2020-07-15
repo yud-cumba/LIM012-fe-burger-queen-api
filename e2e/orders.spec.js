@@ -31,7 +31,7 @@ describe('POST /orders', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 10 },
+        body: { name: 'order', price: 10 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -42,7 +42,7 @@ describe('POST /orders', () => {
       })
       .then(([product, user]) => fetchAsTestUser('/orders', {
         method: 'POST',
-        body: { products: [{ productId: product._id, qty: 5, client: 'client' }], userId: user._id },
+        body: { products: [{ productId: product._id, qty: 5 }], userId: user._id },
       }))
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -63,7 +63,7 @@ describe('POST /orders', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 25 },
+        body: { name: 'order1', price: 25 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
