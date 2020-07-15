@@ -124,25 +124,34 @@ module.exports = (app, nextMain) => {
       status: 'pending',
       dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
+    // saving orders in DB
     postData('orders', newOrder)
       .then((result) => {
+        // because we need to save all products in the list in orders_products table
         products.forEach((productObj) => {
-          // console.log(productObj.product);
           const newOrderProduct = {
             orderId: result.insertId,
             qty: productObj.qty,
             productId: productObj.productId,
           };
           postData('orders_products', newOrderProduct);
-          const dataProduct = products.forEach((p) => {
-            const productID = p.productId;
-            // console.log(productID);
-            return getDataByKeyword('products', '_id', productID);
-          });
         });
-        newOrder._id = (result.insertId).toString();
-        newOrder.products = products;
-        return resp.status(200).send(newOrder);
+        const dataProduct = products.map((p) => {
+          const productID = p.productId;
+          return getDataByKeyword('products', '_id', productID);
+        });
+        // newOrder.products = [];
+        Promise.all(dataProduct).then((values) => {
+          newOrder._id = (result.insertId).toString();
+
+          newOrder.products = values.flat().map((e) => ({
+            product: e,
+          }));
+          newOrder.products.forEach((x, i) => {
+            x.qty = products[i].qty;
+          });
+          return resp.status(200).send(newOrder);
+        });
       })
       .catch((error) => console.error(error));
   });
