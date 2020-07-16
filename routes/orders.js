@@ -9,9 +9,7 @@ const {
   getDataByKeyword, postData, updateDataByKeyword, deleteData,
 } = require('../db-data/sql_functions');
 
-const { getAllData } = require('../db-data/sql_functions');
-
-const { dataError } = require('../utils/utils');
+const { dataError, getOrderProduct } = require('../utils/utils');
 
 /** @module orders */
 module.exports = (app, nextMain) => {
@@ -70,16 +68,9 @@ module.exports = (app, nextMain) => {
     }
     console.log(`hola, soy ${orderId}`);
     getDataByKeyword('orders', '_id', orderId)
-      .then((result) => getDataByKeyword('orders_products', 'orderId', orderId)
-        .then((products) => {
-          const listOfProducts = products.map((productObj) => ({
-            qty: productObj.qty,
-            product: productObj.product,
-          }));
-          result[0]._id = orderId.toString();
-          result[0].products = listOfProducts;
-          return resp.status(200).send(result[0]);
-        }))
+      .then((result) => {
+        getOrderProduct(orderId, result, resp);
+      })
       .catch(() => resp.status(404).send({ message: 'El producto solicitado no existe' }));
   });
 
@@ -214,10 +205,9 @@ module.exports = (app, nextMain) => {
       return dataError(!orderId, !req.headers.authorization, resp);
     }
     getDataByKeyword('orders', '_id', orderId)
-      .then((order) => {
+      .then((result) => {
         deleteData('orders', '_id', orderId);
-        order[0]._id = orderId.toString();
-        return resp.status(200).send(order[0]);
+        getOrderProduct(orderId, result, resp);
       })
       .catch(() => resp.status(404).send({ message: `No existe el producto con id ${orderId}.` }));
   });

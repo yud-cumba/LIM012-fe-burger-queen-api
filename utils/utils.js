@@ -1,4 +1,6 @@
-/* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
+const { getDataByKeyword } = require('../db-data/sql_functions');
+
 const pagination = (pagesNumber, limitsNumber, result, table) => {
   const port = process.argv[2] || process.env.PORT || 8080;
   const pages = (!pagesNumber) ? 1 : pagesNumber;
@@ -33,7 +35,38 @@ const dataError = (condicion, headers, _resp) => {
   }
 };
 
+const getOrderProduct = (orderId, dataTableOrder, resp) => {
+  getDataByKeyword('orders_products', 'orderId', orderId)
+    .then((products) => {
+      const order = dataTableOrder[0];
+      order._id = (order._id).toString();
+      order.userId = (order.userId).toString();
+      const dataProduct = products.map((p) => {
+        // console.log(p);
+        const productID = p.productId;
+        return getDataByKeyword('products', '_id', productID);
+      });
+      // newOrder.products = [];
+      Promise.all(dataProduct).then((values) => {
+        // console.log(values);
+        order.products = values.flat().map((e) => {
+          e._id = (e._id).toString();
+          return {
+            product: e,
+          };
+        });
+        order.products.forEach((x, i) => {
+          x.qty = products[i].qty;
+        });
+        return resp.status(200).send(order);
+      })
+        .catch((error) => console.error(error));
+    })
+    .catch((error) => console.error(error));
+};
+
 module.exports = {
   pagination,
   dataError,
+  getOrderProduct,
 };
