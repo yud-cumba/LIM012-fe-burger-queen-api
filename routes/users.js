@@ -226,6 +226,11 @@ module.exports = (app, next) => {
 
     const updatedDetails = {};
     const role = roles ? roles.admin : false;
+    // const encrypted = (password)? bcrypt.hashSync(password, 10);
+    /* const updatedDetails = {
+      ...((email && validateEmail) && { email, rolesAdmin: role }),
+      ...((password && validatePassword) && { password: encrypted, rolesAdmin: role }),
+    }; */
 
     if (email && validateEmail) {
       updatedDetails.email = email;

@@ -314,7 +314,7 @@ describe('PUT /orders/:orderId', () => {
   it('should fail with 404 when not found', () => (
     fetchAsAdmin('/orders/xxx', {
       method: 'PUT',
-      body: { state: 'canceled' },
+      body: { status: 'canceled' },
     })
       .then((resp) => expect(resp.status).toBe(404))
   ));
@@ -323,7 +323,7 @@ describe('PUT /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product011', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -344,13 +344,19 @@ describe('PUT /orders/:orderId', () => {
       .then((resp) => resp.json())
       .then((json) => fetchAsAdmin(`/orders/${json._id}`, { method: 'PUT' }))
       .then((resp) => expect(resp.status).toBe(400))
+      .then(() => getDataByKeyword('products', 'name', 'product011'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should fail with 400 when bad status', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'order00009', price: 66 },
+        body: { name: 'product012', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -372,13 +378,19 @@ describe('PUT /orders/:orderId', () => {
         body: { status: 'oh yeah!' },
       }))
       .then((resp) => expect(resp.status).toBe(400))
+      .then(() => getDataByKeyword('products', 'name', 'product012'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should update order (set status to preparing)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'orders0010', price: 66 },
+        body: { name: 'product013', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -407,13 +419,19 @@ describe('PUT /orders/:orderId', () => {
         return resp.json();
       })
       .then((json) => expect(json.status).toBe('preparing'))
+      .then(() => getDataByKeyword('products', 'name', 'product013'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should update order (set status to delivering)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product014', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -442,13 +460,19 @@ describe('PUT /orders/:orderId', () => {
         return resp.json();
       })
       .then((json) => expect(json.status).toBe('delivering'))
+      .then(() => getDataByKeyword('products', 'name', 'product014'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should update order (set status to delivered)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product025', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -480,6 +504,12 @@ describe('PUT /orders/:orderId', () => {
         expect(json.status).toBe('delivered');
         expect(typeof json.dateProcessed).toBe('string');
       })
+      .then(() => getDataByKeyword('products', 'name', 'product025'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 });
 
@@ -498,7 +528,7 @@ describe('DELETE /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'product09', price: 25 },
+        body: { name: 'product0202', price: 25 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -524,5 +554,11 @@ describe('DELETE /orders/:orderId', () => {
         return fetchAsAdmin(`/orders/${_id}`);
       })
       .then((resp) => expect(resp.status).toBe(404))
+      .then(() => getDataByKeyword('products', 'name', 'product0202'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 });

@@ -158,18 +158,14 @@ module.exports = (app, nextMain) => {
     } if (isNaN(price) && price !== undefined) {
       return resp.status(400).send('Price have to do a number');
     }
+
     const newProduct = {
+      ...((name) && { name }),
+      ...((type) && { type }),
+      ...((price) && { price }),
+      ...((image) && { image }),
       date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
-    if (name) {
-      newProduct.name = name;
-    } if (type) {
-      newProduct.type = type;
-    } if (price) {
-      newProduct.price = price;
-    } if (image) {
-      newProduct.image = image;
-    }
     getDataByKeyword('products', '_id', id)
       .then((product) => {
         updateDataByKeyword('products', newProduct, '_id', id)

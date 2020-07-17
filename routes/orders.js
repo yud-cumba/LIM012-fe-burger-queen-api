@@ -176,6 +176,52 @@ module.exports = (app, nextMain) => {
    * @code {404} si la orderId con `orderId` indicado no existe
    */
   app.put('/orders/:orderId', requireAuth, (req, resp, next) => {
+    const { orderId } = req.params;
+    const {
+      userId, client, products, status,
+    } = req.body;
+    const notAnyProperty = !(userId || client || products || status);
+    const validateStatus = (status) ? ['pending', 'canceled', 'preparing', 'delivering', 'delivered'].includes(status) : true;
+
+    if ((notAnyProperty || !validateStatus) || !req.headers.authorization) {
+      return dataError((notAnyProperty || !validateStatus), !req.headers.authorization, resp);
+    }
+    const date = new Date();
+    const newOrder = {
+      ...((userId) && { userId }),
+      ...((client) && { client }),
+      ...((status) && { status }),
+      ...((status === 'delivered') && { dateProcessed: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}` }),
+    };
+    getDataByKeyword('orders', '_id', orderId)
+      .then(() => {
+        updateDataByKeyword('orders', newOrder, '_id', orderId)
+          .then(() => {
+            /*
+            */
+            if (products) {
+              return products.reduce((acumulator, element) => {
+                const newOrderProduct = {
+                  ...((products) && { qty: element.qty, productId: element.productId }),
+                };
+                acumulator.push(updateDataByKeyword('orders_products', newOrderProduct, 'productId', element.productId));
+                return acumulator;
+              }, [])
+                .then((x) => Promise.all(x)
+                  .then(() => {
+                    getDataByKeyword('orders', '_id', orderId)
+                      .then((result) => {
+                        getOrderProduct(orderId, result, resp);
+                      });
+                  }));
+            }
+            getDataByKeyword('orders', '_id', orderId)
+              .then((result) => {
+                getOrderProduct(orderId, result, resp);
+              });
+          });
+      })
+      .catch(() => resp.status(404).send({ message: `No existe orden con ese id : ${orderId}` }));
   });
 
   /**
