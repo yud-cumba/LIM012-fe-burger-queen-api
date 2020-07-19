@@ -114,7 +114,6 @@ module.exports = (app, next) => {
    */
   app.get('/users/:str', requireAdmin && requireAuth, (_req, _resp) => {
     const { str } = _req.params;
-    // (`test get /users/:str  Obtiene información de una usuaria ${str}`);
     if (!str || !_req.headers.authorization) {
       return dataError(!str, !_req.headers.authorization, _resp);
     }
@@ -213,32 +212,27 @@ module.exports = (app, next) => {
   app.put('/users/:str', requireAdmin && requireAuth, (_req, _resp, _next) => {
     const { str } = _req.params;
     const { email, password, roles } = _req.body;
+
     const keyword = (str.includes('@')) ? 'email' : '_id';
     const canEdit = (str.includes('@')) ? (_req.user.email === str) : (_req.user._id === Number(str));
+    
     const isAdmin = _req.user.rolesAdmin === 1;
     const cantEditRole = (!!roles && !isAdmin); // false
+
     if (!(canEdit || isAdmin) || cantEditRole) {
       return _resp.status(403).send({ message: 'You do not have enough permissions' });
     }
 
     const validateEmail = validate(email);
     const validatePassword = valPassword(password);
-
-    const updatedDetails = {};
     const role = roles ? roles.admin : false;
-    // const encrypted = (password)? bcrypt.hashSync(password, 10);
-    /* const updatedDetails = {
-      ...((email && validateEmail) && { email, rolesAdmin: role }),
-      ...((password && validatePassword) && { password: encrypted, rolesAdmin: role }),
-    }; */
 
-    if (email && validateEmail) {
-      updatedDetails.email = email;
-      updatedDetails.rolesAdmin = role;
-    } else if (password && validatePassword) {
-      updatedDetails.password = bcrypt.hashSync(password, 10);// ERROR 500 SALT
-      updatedDetails.rolesAdmin = role;
-    }
+    const updatedDetails = {
+      ...((email && validateEmail) && { email, rolesAdmin: role }),
+      // eslint-disable-next-line max-len
+      ...((password && validatePassword) && { password: bcrypt.hashSync(password, 10), rolesAdmin: role }),
+    };
+
     getDataByKeyword('users', keyword, str)
       .then((user) => {
         if (!str || !(email || password || roles)) {
@@ -277,10 +271,7 @@ module.exports = (app, next) => {
    */
   app.delete('/users/:str', requireAdmin && requireAuth, (_req, _resp, _next) => {
     const { str } = _req.params;
-    // const { email } = _req.body;
-    // dataError(!email || !uid, !_req.headers.authorization, _resp);
     if (!str || !_req.headers.authorization) {
-      // (dataError(!(name && price), !req.headers.authorization, resp));
       return dataError(!str, !_req.headers.authorization, _resp);
     }
 
