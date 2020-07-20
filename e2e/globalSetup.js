@@ -3,6 +3,8 @@ const { spawn } = require('child_process');
 const nodeFetch = require('node-fetch');
 const kill = require('tree-kill');
 
+require('@databases/mysql-test/jest/globalSetup');
+
 const config = require('../config');
 
 const port = process.env.PORT || 8888;
@@ -106,7 +108,6 @@ module.exports = () => new Promise((resolve, reject) => {
   }
 
   // TODO: Configurar DB de tests
-
   console.info('Staring local server...');
   const child = spawn('npm', ['start', process.env.PORT || 8888], {
     cwd: path.resolve(__dirname, '../'),

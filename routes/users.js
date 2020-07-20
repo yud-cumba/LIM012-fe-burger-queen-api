@@ -215,7 +215,6 @@ module.exports = (app, next) => {
 
     const keyword = (str.includes('@')) ? 'email' : '_id';
     const canEdit = (str.includes('@')) ? (_req.user.email === str) : (_req.user._id === Number(str));
-    
     const isAdmin = _req.user.rolesAdmin === 1;
     const cantEditRole = (!!roles && !isAdmin); // false
 

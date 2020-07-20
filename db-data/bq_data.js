@@ -1,11 +1,8 @@
 const mysql = require('mysql');
+const config = require('../config');
 
-const database = {
-  host: 'localhost',
-  user: 'fantadnj_bq_1',
-  password: 'R$;DMlD+FkOq',
-  database: 'fantadnj_burguer_queen_1',
-};
+const { dbUrl } = config;
 
-const pool = mysql.createPool(database);
+const pool = mysql.createConnection(dbUrl);
+pool.connect();
 module.exports = pool;

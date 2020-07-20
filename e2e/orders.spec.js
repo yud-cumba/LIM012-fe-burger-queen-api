@@ -269,7 +269,7 @@ describe('GET /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'product06', price: 10 },
+        body: { name: 'product0601', price: 10 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -293,10 +293,10 @@ describe('GET /orders/:orderId', () => {
       })
       .then((json) => {
         expect(json.products.length).toBe(1);
-        expect(json.products[0].product.name).toBe('product06');
+        expect(json.products[0].product.name).toBe('product0601');
         expect(json.products[0].product.price).toBe(10);
       })
-      .then(() => getDataByKeyword('products', 'name', 'product06'))
+      .then(() => getDataByKeyword('products', 'name', 'product0601'))
       .then((data) => {
         fetchAsAdmin(`/products/${data[0]._id}`, {
           method: 'DELETE',
