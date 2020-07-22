@@ -3,7 +3,7 @@ const { spawn } = require('child_process');
 const nodeFetch = require('node-fetch');
 const kill = require('tree-kill');
 
-require('@databases/mysql-test/jest/globalSetup');
+// require('@databases/mysql-test/jest/globalSetup');
 
 const config = require('../config');
 

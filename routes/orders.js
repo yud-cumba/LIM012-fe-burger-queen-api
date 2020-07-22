@@ -66,7 +66,6 @@ module.exports = (app, nextMain) => {
     if (!orderId || !req.headers.authorization) {
       return dataError(!orderId, !req.headers.authorization, resp);
     }
-    console.log(`hola, soy ${orderId}`);
     getDataByKeyword('orders', '_id', orderId)
       .then((result) => {
         getOrderProduct(orderId, result, resp);
@@ -197,8 +196,6 @@ module.exports = (app, nextMain) => {
       .then(() => {
         updateDataByKeyword('orders', newOrder, '_id', orderId)
           .then(() => {
-            /*
-            */
             if (products) {
               return products.reduce((acumulator, element) => {
                 const newOrderProduct = {
