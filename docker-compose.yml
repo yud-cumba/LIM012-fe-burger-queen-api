@@ -6,12 +6,17 @@ services:
 
     image: "mysql:latest"
     environment:
-      # So you don't have to use root, but you can if you like
         MYSQL_ROOT_PASSWORD: Burwood     
-        MYSQL_DATABASE: burger-queen    
+        MYSQL_DATABASE: burger-queen
+        MYSQL_USER: user 
+        MYSQL_PASSWORD: lim012
+    volumes:
+      - mysql_data:/var/lib/mysql  
     ports:
-      - "10005:80"   
+      - "3306"
+      - "33060"
     networks:
+      - public
       - private
   node:
     image: "node:10" # https://hub.docker.com/_/node/
@@ -20,7 +25,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
-      - DB_URL=<CONNECTION STRING>
+      - DB_URL=localhost
     env_file:
       - secrets.env # los _secrets_ a incluir como variables de entorno. Usa el archivo `sample.secrets.env` como guia
     volumes:
@@ -35,6 +40,8 @@ services:
     networks:
       - public
       - private
+volumes:
+  mysql_data:     
 networks:
   public:
     internal: false
