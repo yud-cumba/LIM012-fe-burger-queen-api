@@ -3,12 +3,14 @@ services:
   db:
     # TODO: configura tu imagen de base de datos, te recomendamos una de las sgtes:
     # https://hub.docker.com/_/mysql
-    image: mysql:latest    
-    environment:      
-        MYSQL_ROOT_PASSWORD: burgerqueen012      
+
+    image: "mysql:latest"
+    environment:
+      # So you don't have to use root, but you can if you like
+        MYSQL_ROOT_PASSWORD: Burwood     
         MYSQL_DATABASE: burger-queen    
-    ports:      
-      - "80:3306"
+    ports:
+      - "10005:80"   
     networks:
       - private
   node:
