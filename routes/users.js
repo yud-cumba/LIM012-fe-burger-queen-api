@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
-const pool = require('../db-data/bq_data');
 
 const {
   requireAuth,
@@ -11,7 +10,7 @@ const {
 const { getData } = require('../controller/users');
 
 const {
-  getDataByKeyword, postData, updateDataByKeyword, deleteData,
+  getDataByKeyword, postData, updateDataByKeyword, deleteData, getAllData,
 } = require('../db-data/sql_functions');
 
 const { dataError } = require('../utils/utils');
@@ -34,14 +33,30 @@ const initAdminUser = (app, next) => {
     rolesAdmin: true,
   };
   // TODO: crear usuaria admin
-  pool.query('SELECT * from users', (error, result) => {
-    // console.log(result);
-    if (!result) {
-      pool.query('INSERT INTO users SET ?', adminUser, (error, result) => {
-        if (error) throw error;
-      });
-    }
-  });
+  getAllData('users')
+  .then(() => {
+    console.log('si user');
+    return next();
+  })
+  .catch((result) => { 
+    console.log('no user');
+    console.log(result);
+    return postData('users', adminUser)
+    .then((result) => {
+      console.log(result);
+      return next();
+    })
+  })
+
+  // pool.query('SELECT * from users', (error, result) => {
+  //   console.log(result);
+  //   if (!result) {
+  //     console.log(adminUser);
+  //     pool.query('INSERT INTO users SET ?', adminUser, (error, result) => {
+  //       if (error) throw error;
+  //     });
+  //   }
+  // });
   next();
 };
 
