@@ -6,15 +6,15 @@ services:
 
     image: "mysql:latest"
     environment:
-        MYSQL_ROOT_PASSWORD: Burwood     
-        MYSQL_DATABASE: burger-queen
+        MYSQL_ROOT_PASSWORD: '75587332'     
+        MYSQL_DATABASE: 'databq'
         MYSQL_USER: user 
-        MYSQL_PASSWORD: lim012
+        MYSQL_PASSWORD: 'lim012'
     volumes:
       - mysql_data:/var/lib/mysql  
     ports:
-      - "3306"
-      - "33060"
+      - "5000:3306"
+      - "5001:33060"
     networks:
       - public
       - private
@@ -25,7 +25,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
-      - DB_URL=localhost
+      - DB_URL='127.0.0.1'
     env_file:
       - secrets.env # los _secrets_ a incluir como variables de entorno. Usa el archivo `sample.secrets.env` como guia
     volumes:
