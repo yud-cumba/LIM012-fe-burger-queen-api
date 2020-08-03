@@ -20,6 +20,7 @@ const {
   valPassword,
 } = require('../utils/validators');
 
+
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
@@ -34,8 +35,8 @@ const initAdminUser = (app, next) => {
   };
   // TODO: crear usuaria admin
   getAllData('users')
-  .then(() => {
-    console.log('si user');
+  .then((user) => {
+    console.log(user);
     return next();
   })
   .catch((result) => { 
