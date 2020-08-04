@@ -5,10 +5,12 @@ services:
     # https://hub.docker.com/_/mysql
 
     image: "mysql:latest"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
     environment:
-        MYSQL_ROOT_PASSWORD: '75587332'     
-        MYSQL_DATABASE: 'databq'
-        MYSQL_USER: user 
+        MYSQL_ROOT_PASSWORD: '75587332'
+        MYSQL_DATABASE: databq
+        MYSQL_USER: user
         MYSQL_PASSWORD: 'lim012'
     volumes:
       - mysql_data:/var/lib/mysql  
@@ -19,21 +21,26 @@ services:
       - public
       - private
   node:
-    image: "node:10" # https://hub.docker.com/_/node/
+    image: "node:14" # https://hub.docker.com/_/node/
     user: "node"
     working_dir: /home/node/app
     environment:
       - NODE_ENV=production
-      - PORT=8080
-      - DB_URL='127.0.0.1'
+      - DHOST=db
+      - DUSER_DB=user
+      - DPASSWORD_DB=lim012
+      - DDB_NAME=databq
+      - PORT=8000
+    links: 
+      - db
     env_file:
       - secrets.env # los _secrets_ a incluir como variables de entorno. Usa el archivo `sample.secrets.env` como guia
     volumes:
       - ./:/home/node/app # montamos el codigo en el HOME del usuario _node_
-    expose:
-      - "8080" # nuestra app corre en el puerto 8080
+    #expose:
+     # - "8000" # nuestra app corre en el puerto 8080
     ports:
-      - "80:8080" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
+      - "80:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
     command: "bash -c 'rm -rf node_modules && npm install && npm start'" # reinstalamos las dependencias y levantamos el servidor
     depends_on:
       - db

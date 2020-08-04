@@ -9,7 +9,6 @@ const pkg = require('./package.json');
 // eslint-disable-next-line no-unused-vars
 const { port, dbUrl, secret } = config;
 const app = express(); // inicializarla
-
 app.set('config', config); // settings nombre de variables
 app.set('pkg', pkg);
 
