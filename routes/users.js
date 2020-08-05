@@ -20,7 +20,6 @@ const {
   valPassword,
 } = require('../utils/validators');
 
-
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
@@ -35,30 +34,9 @@ const initAdminUser = (app, next) => {
   };
   // TODO: crear usuaria admin
   getAllData('users')
-  .then((user) => {
-    console.log(user);
-    return next();
-  })
-  .catch((result) => { 
-    console.log('no user');
-    console.log(result);
-    return postData('users', adminUser)
-    .then((result) => {
-      console.log(result);
-      return next();
-    })
-  })
-
-  // pool.query('SELECT * from users', (error, result) => {
-  //   console.log(result);
-  //   if (!result) {
-  //     console.log(adminUser);
-  //     pool.query('INSERT INTO users SET ?', adminUser, (error, result) => {
-  //       if (error) throw error;
-  //     });
-  //   }
-  // });
-  next();
+    .then((user) => next())
+    .catch((result) => postData('users', adminUser)
+      .then((result) => next()));
 };
 
 /*
@@ -189,7 +167,6 @@ module.exports = (app, next) => {
       rolesAdmin: role,
     };
     // Para saber si usuario existe en la base de datos
-
     getDataByKeyword('users', 'email', email)
       .then(() => resp.status(403).send({ message: `Ya existe usuaria con el email : ${email}` }))
       .catch(() => {
