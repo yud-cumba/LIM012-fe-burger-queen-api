@@ -23,7 +23,6 @@ routes(app, (err) => {
   if (err) {
     throw err;
   }
-  console.log(app);
   app.use(errorHandler);
 
   app.listen(port, () => { // iniciar en el puerto ${port}

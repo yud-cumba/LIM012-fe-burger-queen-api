@@ -114,6 +114,7 @@ module.exports = (app, nextMain) => {
       status: 'pending',
       dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
+    console.log(newOrder);
     // saving orders in DB
     postData('orders', newOrder)
       .then((result) => {
@@ -197,25 +198,26 @@ module.exports = (app, nextMain) => {
         updateDataByKeyword('orders', newOrder, '_id', orderId)
           .then(() => {
             if (products) {
-              return products.reduce((acumulator, element) => {
+              const x = products.reduce((acumulator, element) => {
                 const newOrderProduct = {
                   ...((products) && { qty: element.qty, productId: element.productId }),
                 };
                 acumulator.push(updateDataByKeyword('orders_products', newOrderProduct, 'productId', element.productId));
                 return acumulator;
-              }, [])
-                .then((x) => Promise.all(x)
-                  .then(() => {
-                    getDataByKeyword('orders', '_id', orderId)
-                      .then((result) => {
-                        getOrderProduct(orderId, result, resp);
-                      });
-                  }));
+              }, []);
+              Promise.all(x)
+                .then(() => {
+                  getDataByKeyword('orders', '_id', orderId)
+                    .then((result) => {
+                      getOrderProduct(orderId, result, resp);
+                    });
+                });
+            } else {
+              getDataByKeyword('orders', '_id', orderId)
+                .then((result) => {
+                  getOrderProduct(orderId, result, resp);
+                });
             }
-            getDataByKeyword('orders', '_id', orderId)
-              .then((result) => {
-                getOrderProduct(orderId, result, resp);
-              });
           });
       })
       .catch(() => resp.status(404).send({ message: `No existe orden con ese id : ${orderId}` }));

@@ -32,6 +32,8 @@ module.exports = (app, nextMain) => {
         if (error) throw error;
         // eslint-disable-next-line max-len
         const payload = result.find((user) => user.email === email && bcrypt.compareSync(password, user.password));
+        console.log(payload);
+
         if (payload) {
           const token = jwt.sign({ email: payload.email, password: payload.password }, secret);
           resp.header('authorization', token);
