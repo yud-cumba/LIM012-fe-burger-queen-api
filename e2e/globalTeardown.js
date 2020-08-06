@@ -1,5 +1,5 @@
 const kill = require('tree-kill');
-// require('@databases/mysql-test/jest/globalTeardown');
+require('@databases/mysql-test/jest/globalTeardown');
 
 module.exports = () => new Promise((resolve) => {
   if (!global.__e2e.childProcessPid) {

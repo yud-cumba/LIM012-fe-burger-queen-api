@@ -34,9 +34,7 @@ const initAdminUser = (app, next) => {
   };
   // TODO: crear usuaria admin
   getAllData('users')
-    .then(() => {
-      return next();
-    })
+    .then(() => next())
     .catch(() => {
       postData('users', adminUser);
       return next();
