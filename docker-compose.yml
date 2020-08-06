@@ -7,10 +7,10 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-        MYSQL_ROOT_PASSWORD: "rootroot"     
-        MYSQL_DATABASE: "bq"
-        MYSQL_USER: "user"
-        MYSQL_PASSWORD: "lim012"
+        MYSQL_ROOT_PASSWORD: '75587332'
+        MYSQL_DATABASE: databq
+        MYSQL_USER: user
+        MYSQL_PASSWORD: 'lim012'
     volumes:
       - mysql_data:/var/lib/mysql  
     ports:
@@ -36,10 +36,10 @@ services:
       - secrets.env # los _secrets_ a incluir como variables de entorno. Usa el archivo `sample.secrets.env` como guia
     volumes:
       - ./:/home/node/app # montamos el codigo en el HOME del usuario _node_
-    expose:
-      - "8080" # nuestra app corre en el puerto 8080
+    #expose:
+     # - "8000" # nuestra app corre en el puerto 8080
     ports:
-      - "80:8080" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
+      - "80:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
     command: "bash -c 'rm -rf node_modules && npm install && npm start'" # reinstalamos las dependencias y levantamos el servidor
     depends_on:
       - db

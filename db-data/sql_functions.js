@@ -36,6 +36,7 @@ const updateDataByKeyword = (table, toUpdate, keyword, value) => new Promise((re
   pool.query(`UPDATE ${table} SET ? WHERE ${keyword} = ?`, [toUpdate, value], (error, result) => {
     if (error) { throw error; }
     // eslint-disable-next-line no-param-reassign
+    if (error) throw error;
     resolve(result);
     reject(error);
   });
