@@ -7,9 +7,6 @@ const db = {
   database: process.env.DDB_NAMES || process.env.DB_NAME,
 };
 
-// eslint-disable-next-line no-console
-console.log(db);
-
 exports.port = process.argv[2] || process.env.PORT || 8080;
 exports.dbUrl = db;
 exports.secret = process.env.JWT_SECRET;

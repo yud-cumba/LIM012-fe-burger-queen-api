@@ -108,7 +108,7 @@ module.exports = (app, nextMain) => {
       price,
       image,
       type,
-      date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+      dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
     getDataByKeyword('products', 'name', name)
       .then(() => resp.status(404).send({ message: `Ya existe un producto con el nombre: ${name}` }))
@@ -164,7 +164,7 @@ module.exports = (app, nextMain) => {
       ...((type) && { type }),
       ...((price) && { price }),
       ...((image) && { image }),
-      date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+      dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
     getDataByKeyword('products', '_id', id)
       .then((product) => {
