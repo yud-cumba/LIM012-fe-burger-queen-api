@@ -2,6 +2,7 @@ const pool = require('./bq_data');
 
 const getAllData = (table) => new Promise((resolve, reject) => {
   pool.query(`SELECT * FROM ${table}`, (error, result) => {
+    console.log(result);
     if (error) { throw error; }
     if (result.length) {
       resolve(result);
