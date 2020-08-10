@@ -17,11 +17,10 @@ services:
       - "5000:3306"
       - "5001:33060"
     networks:
-      - public
       - private
   node:
     image: "node:14" # https://hub.docker.com/_/node/
-    user: "node"
+    user: "root"
     working_dir: /home/node/app
     environment:
       - NODE_ENV=production
