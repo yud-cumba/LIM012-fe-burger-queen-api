@@ -1,7 +1,9 @@
+jest.setTimeout(500000);
+
+/* eslint-disable no-console */
 const url = require('url');
 const qs = require('querystring');
 const config = require('../config');
-
 
 const {
   fetch,
@@ -10,13 +12,11 @@ const {
   fetchWithAuth,
 } = process;
 
-
 const parseLinkHeader = (str) => str.split(',')
   .reduce((memo, item) => {
     const [, value, key] = /^<(.*)>;\s+rel="(first|last|prev|next)"/.exec(item.trim());
     return { ...memo, [key]: value };
   }, {});
-
 
 describe('GET /users', () => {
   it('should fail with 401 when no auth', () => (
@@ -92,7 +92,6 @@ describe('GET /users', () => {
   ));
 });
 
-
 describe('GET /users/:uid', () => {
   it('should fail with 401 when no auth', () => (
     fetch('/users/foo@bar.baz').then((resp) => expect(resp.status).toBe(401))
@@ -127,7 +126,6 @@ describe('GET /users/:uid', () => {
   ));
 });
 
-
 describe('POST /users', () => {
   it('should respond with 400 when email and password missing', () => (
     fetchAsAdmin('/users', { method: 'POST' })
@@ -155,11 +153,12 @@ describe('POST /users', () => {
   ));
 
   it('should create new user', () => (
+    // si los crea passed
     fetchAsAdmin('/users', {
       method: 'POST',
       body: {
         email: 'test1@test.test',
-        password: '12345',
+        password: '123456',
         roles: { admin: false },
       },
     })
@@ -177,11 +176,12 @@ describe('POST /users', () => {
   ));
 
   it('should create new admin user', () => (
+    // SI LO CREA EN DB
     fetchAsAdmin('/users', {
       method: 'POST',
       body: {
         email: 'admin1@test.test',
-        password: '12345',
+        password: '123456', // adding 6
         roles: { admin: true },
       },
     })
@@ -206,7 +206,6 @@ describe('POST /users', () => {
       .then((resp) => expect(resp.status).toBe(403))
   ));
 });
-
 
 describe('PUT /users/:uid', () => {
   it('should fail with 401 when no auth', () => (
@@ -272,7 +271,6 @@ describe('PUT /users/:uid', () => {
   ));
 });
 
-
 describe('DELETE /users/:uid', () => {
   it('should fail with 401 when no auth', () => (
     fetch('/users/foo@bar.baz', { method: 'DELETE' })
@@ -290,7 +288,7 @@ describe('DELETE /users/:uid', () => {
   ));
 
   it('should delete own user', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234' };
+    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '123456' };
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetch('/auth', { method: 'POST', body: credentials }))
@@ -307,7 +305,7 @@ describe('DELETE /users/:uid', () => {
   });
 
   it('should delete other user as admin', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234' };
+    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '123456' };
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetchAsAdmin(`/users/${credentials.email}`, { method: 'DELETE' }))

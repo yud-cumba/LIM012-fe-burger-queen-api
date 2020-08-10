@@ -1,9 +1,11 @@
+jest.setTimeout(1000000);
+const { getDataByKeyword } = require('../db-data/sql_functions');
+
 const {
   fetch,
   fetchAsTestUser,
   fetchAsAdmin,
 } = process;
-
 
 describe('POST /orders', () => {
   it('should fail with 401 when no auth', () => (
@@ -30,7 +32,7 @@ describe('POST /orders', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 10 },
+        body: { name: 'product01', price: 10 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -41,7 +43,7 @@ describe('POST /orders', () => {
       })
       .then(([product, user]) => fetchAsTestUser('/orders', {
         method: 'POST',
-        body: { products: [{ productId: product._id, qty: 5, client: 'client' }], userId: user._id },
+        body: { products: [{ productId: product._id, qty: 5 }], userId: user._id },
       }))
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -49,12 +51,18 @@ describe('POST /orders', () => {
       })
       .then((json) => {
         expect(typeof json._id).toBe('string');
-        expect(json.client).toBe('client');
+        // expect(json.client).toBe('client');
         expect(typeof json.dateEntry).toBe('string');
         expect(Array.isArray(json.products)).toBe(true);
         expect(json.products.length).toBe(1);
-        expect(json.products[0].product.name).toBe('Test');
+        expect(json.products[0].product.name).toBe('product01');
         expect(json.products[0].product.price).toBe(10);
+      })
+      .then(() => getDataByKeyword('products', 'name', 'product01'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
       })
   ));
 
@@ -62,7 +70,7 @@ describe('POST /orders', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 25 },
+        body: { name: 'product02', price: 25 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -84,12 +92,17 @@ describe('POST /orders', () => {
         expect(typeof json.dateEntry).toBe('string');
         expect(Array.isArray(json.products)).toBe(true);
         expect(json.products.length).toBe(1);
-        expect(json.products[0].product.name).toBe('Test');
+        expect(json.products[0].product.name).toBe('product02');
         expect(json.products[0].product.price).toBe(25);
+      })
+      .then(() => getDataByKeyword('products', 'name', 'product02'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
       })
   ));
 });
-
 
 describe('GET /orders', () => {
   it('should fail with 401 when no auth', () => (
@@ -101,7 +114,7 @@ describe('GET /orders', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 10 },
+        body: { name: 'product03', price: 10 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -141,13 +154,19 @@ describe('GET /orders', () => {
         ), []);
         expect(userIds.length >= 1).toBe(true);
       })
+      .then(() => getDataByKeyword('products', 'name', 'product03'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should get orders as admin', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 10 },
+        body: { name: 'product04', price: 10 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -187,9 +206,14 @@ describe('GET /orders', () => {
         ), []);
         expect(userIds.length >= 1).toBe(true);
       })
+      .then(() => getDataByKeyword('products', 'name', 'product04'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 });
-
 
 describe('GET /orders/:orderId', () => {
   it('should fail with 401 when no auth', () => (
@@ -206,7 +230,7 @@ describe('GET /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 99 },
+        body: { name: 'product05', price: 99 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -230,8 +254,14 @@ describe('GET /orders/:orderId', () => {
       })
       .then((json) => {
         expect(json.products.length).toBe(1);
-        expect(json.products[0].product.name).toBe('Test');
+        expect(json.products[0].product.name).toBe('product05');
         expect(json.products[0].product.price).toBe(99);
+      })
+      .then(() => getDataByKeyword('products', 'name', 'product05'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
       })
   ));
 
@@ -239,7 +269,7 @@ describe('GET /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 10 },
+        body: { name: 'product0601', price: 10 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -263,12 +293,17 @@ describe('GET /orders/:orderId', () => {
       })
       .then((json) => {
         expect(json.products.length).toBe(1);
-        expect(json.products[0].product.name).toBe('Test');
+        expect(json.products[0].product.name).toBe('product0601');
         expect(json.products[0].product.price).toBe(10);
+      })
+      .then(() => getDataByKeyword('products', 'name', 'product0601'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
       })
   ));
 });
-
 
 describe('PUT /orders/:orderId', () => {
   it('should fail with 401 when no auth', () => (
@@ -279,7 +314,7 @@ describe('PUT /orders/:orderId', () => {
   it('should fail with 404 when not found', () => (
     fetchAsAdmin('/orders/xxx', {
       method: 'PUT',
-      body: { state: 'canceled' },
+      body: { status: 'canceled' },
     })
       .then((resp) => expect(resp.status).toBe(404))
   ));
@@ -288,7 +323,7 @@ describe('PUT /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product011', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -309,13 +344,19 @@ describe('PUT /orders/:orderId', () => {
       .then((resp) => resp.json())
       .then((json) => fetchAsAdmin(`/orders/${json._id}`, { method: 'PUT' }))
       .then((resp) => expect(resp.status).toBe(400))
+      .then(() => getDataByKeyword('products', 'name', 'product011'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should fail with 400 when bad status', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product012', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -337,13 +378,19 @@ describe('PUT /orders/:orderId', () => {
         body: { status: 'oh yeah!' },
       }))
       .then((resp) => expect(resp.status).toBe(400))
+      .then(() => getDataByKeyword('products', 'name', 'product012'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should update order (set status to preparing)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product013', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -372,13 +419,19 @@ describe('PUT /orders/:orderId', () => {
         return resp.json();
       })
       .then((json) => expect(json.status).toBe('preparing'))
+      .then(() => getDataByKeyword('products', 'name', 'product013'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should update order (set status to delivering)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product014', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -407,13 +460,19 @@ describe('PUT /orders/:orderId', () => {
         return resp.json();
       })
       .then((json) => expect(json.status).toBe('delivering'))
+      .then(() => getDataByKeyword('products', 'name', 'product014'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 
   it('should update order (set status to delivered)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'product025', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -445,9 +504,14 @@ describe('PUT /orders/:orderId', () => {
         expect(json.status).toBe('delivered');
         expect(typeof json.dateProcessed).toBe('string');
       })
+      .then(() => getDataByKeyword('products', 'name', 'product025'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 });
-
 
 describe('DELETE /orders/:orderId', () => {
   it('should fail with 401 when no auth', () => (
@@ -464,7 +528,7 @@ describe('DELETE /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 25 },
+        body: { name: 'product0202', price: 25 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -490,5 +554,11 @@ describe('DELETE /orders/:orderId', () => {
         return fetchAsAdmin(`/orders/${_id}`);
       })
       .then((resp) => expect(resp.status).toBe(404))
+      .then(() => getDataByKeyword('products', 'name', 'product0202'))
+      .then((data) => {
+        fetchAsAdmin(`/products/${data[0]._id}`, {
+          method: 'DELETE',
+        });
+      })
   ));
 });

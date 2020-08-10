@@ -1,11 +1,14 @@
 const mysql = require('mysql');
+const config = require('../config');
 
-const database = {
-  host: 'localhost',
-  user: 'fantadnj_bq_1',
-  password: 'R$;DMlD+FkOq',
-  database: 'fantadnj_burguer_queen_1',
-};
-
-const pool = mysql.createPool(database);
+const { dbUrl } = config;
+// eslint-disable-next-line no-console
+console.log(dbUrl);
+const pool = mysql.createConnection(dbUrl);
+// pool.connect();
+pool.connect((err) => {
+  if (err) throw err;
+});
+// eslint-disable-next-line no-console
+console.log(pool.state);
 module.exports = pool;
