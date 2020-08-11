@@ -7,12 +7,10 @@ const sinon = require('sinon');
 const mockMysql = sinon.mock(require('mysql'));
 // Crear stub para connect
 const connectStub = sinon.stub().callsFake(() => {
-  // eslint-disable-next-line no-console
-  console.log('connected');
   // cb();
 });
 // Crear stub para query
-const queryStub = sinon.stub();// stubs are funtion call by the main component
+const queryStub = sinon.stub();
 // Crear stub para end
 // const endStub = sinon.stub();
 // Cuando se cree la conexión, reemplazar resultado con stubs
@@ -25,11 +23,12 @@ mockMysql.expects('createConnection').returns({
 // Invocar nuestra libreria/metodos a probar
 const db = require('../../db-data/sql_functions');
 
-const userTable = [
+const users = [
   {
     _id: 1010001,
     email: 'test@test.test',
     password: 'password12345',
+    rolesAdmin: true,
   }];
 const error = new Error('error');
 
@@ -41,13 +40,15 @@ describe('getAllData(user)', () => {
       cb(error, []);
     });
     return db.getAllData('users')
-      .catch((error) => expect(error.message).toBe('error'));
+      .catch((error) => {
+        expect(error.message).toBe('error');
+      });
   });
 
   it('should return data if exits from users', () => {
     // en vez de llamar .query llama al callFake
     queryStub.callsFake((query, cb) => {
-      cb('error', userTable);
+      cb('error', users);
     });
     return db.getAllData('users')
       .then((result) => {
@@ -64,12 +65,12 @@ describe('getAllData(user)', () => {
   // get all data by keyword
 });
 
-describe('getDataByKeyword(user,_id, 1010001)', () => {
+describe('getDataByKeyword(user,_id, 1010001 )', () => {
   // get all data
   it('should throw error if data is null', () => {
     // en vez de llamar .query llama al callFake
     queryStub.callsFake((query, value, cb) => {
-      const result = userTable.filter((user) => user._id === value);
+      const result = users.filter((user) => user._id === value);
       cb(error, result);
     });
     return db.getDataByKeyword('users', '_id', 1010002)
@@ -81,7 +82,7 @@ describe('getDataByKeyword(user,_id, 1010001)', () => {
   it('should return data if exits from users', () => {
     // en vez de llamar .query llama al callFake
     queryStub.callsFake((query, value, cb) => {
-      const result = userTable.filter((user) => user._id === value);
+      const result = users.filter((user) => user._id === value);
       cb(error, result);
     });
     return db.getDataByKeyword('users', '_id', 1010001)
@@ -94,71 +95,55 @@ describe('getDataByKeyword(user,_id, 1010001)', () => {
 
 describe('postData( users, toInsert)', () => {
   // get all data
-  it('should throw error if data is null', () => {
-    // en vez de llamar .query llama al callFake
-    queryStub.callsFake((query, toInsert, cb) => {
-      const result = userTable.push(toInsert);
-      cb(error, result);
-    });
-    return db.postData('users', '_id', 1010002)
-      .catch((error) => {
-        expect(error.message).toBe(undefined);
-      });
-  });
-
   it('should return data if exits from users', () => {
     // en vez de llamar .query llama al callFake
     queryStub.callsFake((query, toInsert, cb) => {
-      const result = userTable.push(toInsert);
-      cb(error, result);
+      users.push(toInsert);
+      cb(error, users);
     });
     const newUser = {
       _id: 1010002,
       email: 'newuser@test.test',
       password: 'password12345',
+      rolesAdmin: false,
     };
     return db.postData('users', newUser)
       .then((result) => {
-        console.log(result);
+        expect(result.some((user) => user._id === 1010002)).toBe(true);
       });
   });
 });
+
 describe('Update Data', () => {
-  it('Shuld update a user', (done) => {
-    const result = userTable.map((e) => { // updates password
-      if (e.email === userTable[0].email) { e.password = '123456'; }
-      return e;
+  it('Should update a user', () => {
+    queryStub.callsFake((query, [toUpdate, value], cb) => {
+      const userByKeyword = users.filter((user) => user.email === value);
+      const { password, rolesAdmin } = toUpdate;
+      const result = userByKeyword[0];
+      result.password = (password) || userByKeyword[0].password;
+      result.rolesAdmin = (rolesAdmin) || userByKeyword[0].rolesAdmin;
+      cb(error, result);
     });
-    expect.assertions();
-    queryStub.callsFake((query, cb) => { // it replaces .query
-      console.log(cb);
-      cb(error, result[1]);
-      done();
-    });
-    db.updateDataByKeyword('users', { password: '123456' }, 'email', userTable[0].email)
-      .then((r) => {
-        console.log(r);
-        expect(r.password).toBe('123456');
+
+    return db.updateDataByKeyword('users', { password: '123456' }, 'email', 'test@test.test')
+      .then((result) => {
+        expect(result.password).toBe('123456');
       });
   });
 });
+
 describe('Delete data', () => {
-  it('Should delete a user', (done) => {
-    const result = userTable.filter((e) => {
-      if ((e._id !== userTable[0]._id)) {
-        return e;
-      }
-    });
-    expect.assertions();
-    queryStub.callsFake((query, cb) => { // it replaces .query
-      console.log(cb);
+  it('Should delete a user', () => {
+    queryStub.callsFake((query, idValue, cb) => {
+      const result = users.filter((user) => user._id !== idValue);
       cb(error, result);
-      done();
     });
-    db.deleteData('users', '_id', userTable[0]._id)
-      .then((r) => {
-        // console.log(r);
-        expect(r).toBe(expect.arrayContaining(result));
+    return db.deleteData('users', '_id', 1010001)
+      .then((result) => {
+        const userDeleted = users.filter((user) => user._id === 1010001);
+        expect(result).toEqual(
+          expect.not.arrayContaining(userDeleted),
+        );
       });
   });
 });

@@ -42,13 +42,10 @@ const getOrderProduct = (orderId, dataTableOrder, resp) => {
       order._id = (order._id).toString();
       order.userId = (order.userId).toString();
       const dataProduct = products.map((p) => {
-        // console.log(p);
         const productID = p.productId;
         return getDataByKeyword('products', '_id', productID);
       });
-      // newOrder.products = [];
       Promise.all(dataProduct).then((values) => {
-        // console.log(values);
         order.products = values.flat().map((e) => {
           e._id = (e._id).toString();
           return {
