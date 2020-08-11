@@ -22,7 +22,6 @@ const getDataByKeyword = (table, keyword, value) => new Promise((resolve, reject
 
 const postData = (table, toInsert) => new Promise((resolve, reject) => {
   pool.query(`INSERT INTO ${table} SET ?`, toInsert, (error, result) => {
-    if (error) throw error;
     resolve(result);
     reject(error);
   });
@@ -31,7 +30,6 @@ const postData = (table, toInsert) => new Promise((resolve, reject) => {
 const updateDataByKeyword = (table, toUpdate, keyword, value) => new Promise((resolve, reject) => {
   pool.query(`UPDATE ${table} SET ? WHERE ${keyword} = ?`, [toUpdate, value], (error, result) => {
     // eslint-disable-next-line no-param-reassign
-    if (error) throw error;
     resolve(result);
     reject(error);
   });
