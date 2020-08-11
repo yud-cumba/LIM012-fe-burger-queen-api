@@ -1,78 +1,164 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable no-console */
 // Importar sinon
+jest.setTimeout(1000000);
 const sinon = require('sinon');
 // Mockear MySQL con sinon
 const mockMysql = sinon.mock(require('mysql'));
 // Crear stub para connect
-const connectStub = sinon.stub().callsFake((cb) => {
+const connectStub = sinon.stub().callsFake(() => {
+  // eslint-disable-next-line no-console
   console.log('connected');
-  console.log(cb);
   // cb();
 });
 // Crear stub para query
-const queryStub = sinon.stub();
+const queryStub = sinon.stub();// stubs are funtion call by the main component
 // Crear stub para end
-const endStub = sinon.stub();
+// const endStub = sinon.stub();
 // Cuando se cree la conexión, reemplazar resultado con stubs
 mockMysql.expects('createConnection').returns({
   connect: connectStub,
   query: queryStub,
-  end: endStub,
+  // end: endStub,
 });
+
 // Invocar nuestra libreria/metodos a probar
 const db = require('../../db-data/sql_functions');
 
-describe('mySQL', () => {
-  /*
-  it('should create a db', (done) => {
-    // En cada test podemos reemplazar la funcion a ser llamada
-    // usando callsFake
-    expect.hasAssertions();
+const userTable = [
+  {
+    _id: 1010001,
+    email: 'test@test.test',
+    password: 'password12345',
+  }];
+const error = new Error('error');
+
+describe('getAllData(user)', () => {
+  // get all data
+  it('should throw error if data is null', () => {
+    // en vez de llamar .query llama al callFake
     queryStub.callsFake((query, cb) => {
-      expect(query).toBe('CREATE DATABASE mydb');
-      // Este callback es el que se espera sea llamado en cada query
-      // aqui podemos retornar cualquier información que deseamos
-      cb();
-      done();
+      cb(error, []);
     });
-    db.createDb();
-  }); */
-  /*
-  it('should create a table', (done) => {
-    expect.hasAssertions();
+    return db.getAllData('users')
+      .catch((error) => expect(error.message).toBe('error'));
+  });
+
+  it('should return data if exits from users', () => {
+    // en vez de llamar .query llama al callFake
     queryStub.callsFake((query, cb) => {
-      expect(query).toBe('CREATE TABLE customers (name VARCHAR(255), address VARCHAR(255))');
-      cb();
-      done();
+      cb('error', userTable);
     });
-    db.createTable();
-  }); */
-  it('should insert into a table', (done) => {
-    expect.hasAssertions();
-    queryStub.callsFake((query, cb) => {
-      console.log(query);
+    return db.getAllData('users')
+      .then((result) => {
+        result.map((result) => {
+          expect(typeof result._id).toBe('number');
+          expect(result._id).toBe(1010001);
+          expect(typeof result.email).toBe('string');
+          expect(result.email).toBe('test@test.test');
+          expect(typeof result.password).toBe('string');
+          expect(result.password).toBe('password12345');
+        });
+      });
+  });
+  // get all data by keyword
+});
+
+describe('getDataByKeyword(user,_id, 1010001)', () => {
+  // get all data
+  it('should throw error if data is null', () => {
+    // en vez de llamar .query llama al callFake
+    queryStub.callsFake((query, value, cb) => {
+      const result = userTable.filter((user) => user._id === value);
+      cb(error, result);
+    });
+    return db.getDataByKeyword('users', '_id', 1010002)
+      .catch((error) => {
+        expect(error.message).toBe('error');
+      });
+  });
+
+  it('should return data if exits from users', () => {
+    // en vez de llamar .query llama al callFake
+    queryStub.callsFake((query, value, cb) => {
+      const result = userTable.filter((user) => user._id === value);
+      cb(error, result);
+    });
+    return db.getDataByKeyword('users', '_id', 1010001)
+      .then((result) => {
+        expect(typeof result[0]._id).toBe('number');
+        expect(result[0]._id).toBe(1010001);
+      });
+  });
+});
+
+describe('postData( users, toInsert)', () => {
+  // get all data
+  it('should throw error if data is null', () => {
+    // en vez de llamar .query llama al callFake
+    queryStub.callsFake((query, toInsert, cb) => {
+      const result = userTable.push(toInsert);
+      cb(error, result);
+    });
+    return db.postData('users', '_id', 1010002)
+      .catch((error) => {
+        expect(error.message).toBe(undefined);
+      });
+  });
+
+  it('should return data if exits from users', () => {
+    // en vez de llamar .query llama al callFake
+    queryStub.callsFake((query, toInsert, cb) => {
+      const result = userTable.push(toInsert);
+      cb(error, result);
+    });
+    const newUser = {
+      _id: 1010002,
+      email: 'newuser@test.test',
+      password: 'password12345',
+    };
+    return db.postData('users', newUser)
+      .then((result) => {
+        console.log(result);
+      });
+  });
+});
+describe('Update Data', () => {
+  it('Shuld update a user', (done) => {
+    const result = userTable.map((e) => { // updates password
+      if (e.email === userTable[0].email) { e.password = '123456'; }
+      return e;
+    });
+    expect.assertions();
+    queryStub.callsFake((query, cb) => { // it replaces .query
       console.log(cb);
-      expect(query).toBe('INSERT INTO users SET ?');
-      // cb();
+      cb(error, result[1]);
       done();
     });
-    db.postData('users', { email: 'test@cucaracha.test', password: 123456, rolesAdmin: false });
+    db.updateDataByKeyword('users', { password: '123456' }, 'email', userTable[0].email)
+      .then((r) => {
+        console.log(r);
+        expect(r.password).toBe('123456');
+      });
   });
-  it('should select from a table', (done) => {
-    expect.hasAssertions();
-    queryStub.callsFake((query, cb) => {
-      expect(query).toBe('SELECT * FROM products');
-      cb(null, [{ email: 'test@cucaracha.test', password: 123456, rolesAdmin: false }]);
+});
+describe('Delete data', () => {
+  it('Should delete a user', (done) => {
+    const result = userTable.filter((e) => {
+      if ((e._id !== userTable[0]._id)) {
+        return e;
+      }
+    });
+    expect.assertions();
+    queryStub.callsFake((query, cb) => { // it replaces .query
+      console.log(cb);
+      cb(error, result);
       done();
     });
-    db.getAllData('products');
+    db.deleteData('users', '_id', userTable[0]._id)
+      .then((r) => {
+        // console.log(r);
+        expect(r).toBe(expect.arrayContaining(result));
+      });
   });
-  // it('should close the connection', (done) => {
-  //   expect.hasAssertions();
-  //   endStub.callsFake(() => {
-  //     expect(endStub.called).toBe(true);
-  //     console.log('connection closed');
-  //     done();
-  //   });
-  //   db.closeConnection();
-  // });
 });
