@@ -36,7 +36,7 @@ const initAdminUser = (app, next) => {
   getAllData('users')
     .then(() => next())
     .catch(() => {
-	console.log('no user');
+      console.log('no user');
       postData('users', adminUser);
       return next();
     });

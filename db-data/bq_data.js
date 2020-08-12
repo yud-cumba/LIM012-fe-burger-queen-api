@@ -7,6 +7,8 @@ const pool = mysql.createConnection(dbUrl);
 // eslint-disable-next-line no-console
 // console.log(pool.state);
 pool.connect();
+
+
 const createTable = (table, values) => {
   const sql = `CREATE TABLE IF NOT EXISTS ${table} ${values}`;
   pool.query(sql, (err, result) => {
