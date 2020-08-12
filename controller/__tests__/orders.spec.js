@@ -77,7 +77,7 @@ describe('Function getDataByKeyword(table, keyword, value)', () => {
       const result = orders.filter((order) => order._id === value);
       cb(error, result);
     });
-    return db.getDataByKeyword('producs', '_id', 1)
+    return db.getDataByKeyword('orders', '_id', 1)
       .then((result) => {
         expect(typeof result[0]._id).toBe('number');
         expect(result[0]._id).toBe(1);
