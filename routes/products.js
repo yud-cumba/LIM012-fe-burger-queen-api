@@ -167,7 +167,7 @@ module.exports = (app, nextMain) => {
       dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
     getDataByKeyword('products', '_id', id)
-      .then((product) => {
+      .then(() => {
         updateDataByKeyword('products', newProduct, '_id', id)
           .then(() => {
             getDataByKeyword('products', '_id', id)

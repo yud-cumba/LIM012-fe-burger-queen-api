@@ -36,6 +36,7 @@ const initAdminUser = (app, next) => {
   getAllData('users')
     .then(() => next())
     .catch(() => {
+      console.log('no user');
       postData('users', adminUser);
       return next();
     });
@@ -169,7 +170,6 @@ module.exports = (app, next) => {
       rolesAdmin: role,
     };
     // Para saber si usuario existe en la base de datos
-
     getDataByKeyword('users', 'email', email)
       .then(() => resp.status(403).send({ message: `Ya existe usuaria con el email : ${email}` }))
       .catch(() => {

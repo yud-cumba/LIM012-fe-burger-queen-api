@@ -162,7 +162,7 @@ describe('PUT /products/:productid', () => {
   it('should update product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'test3', price: 10 },
+      body: { name: 'test30', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -177,7 +177,7 @@ describe('PUT /products/:productid', () => {
         return resp.json();
       })
       .then((json) => expect(json.price).toBe(20))
-      .then(() => getDataByKeyword('products', 'name', 'test3'))
+      .then(() => getDataByKeyword('products', 'name', 'test30'))
       .then((data) => {
         fetchAsAdmin(`/products/${data[0]._id}`, {
           method: 'DELETE',

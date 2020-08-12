@@ -22,6 +22,7 @@ module.exports = (secret) => (req, resp, next) => {
     try {
       pool.query('SELECT * FROM users', (error, result) => {
         if (error) { throw error; }
+        // console.log(decodedToken);
         const userVerified = result.find((user) => user.email === decodedToken.email);
         if (userVerified) {
           req.user = userVerified;
@@ -48,10 +49,6 @@ module.exports.isAdmin = (req) => {
   }
   return false;
 };
-
-/* module.exports.isMyRecord = (req) => {
- if(req.user.email === )
-}; */
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))

@@ -114,6 +114,7 @@ module.exports = (app, nextMain) => {
       status: 'pending',
       dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
+    console.log(newOrder);
     // saving orders in DB
     postData('orders', newOrder)
       .then((result) => {
@@ -197,14 +198,14 @@ module.exports = (app, nextMain) => {
         updateDataByKeyword('orders', newOrder, '_id', orderId)
           .then(() => {
             if (products) {
-              const promiseProducts = products.reduce((acumulator, element) => {
+              const x = products.reduce((acumulator, element) => {
                 const newOrderProduct = {
                   ...((products) && { qty: element.qty, productId: element.productId }),
                 };
                 acumulator.push(updateDataByKeyword('orders_products', newOrderProduct, 'productId', element.productId));
                 return acumulator;
               }, []);
-              Promise.all(promiseProducts)
+              Promise.all(x)
                 .then(() => {
                   getDataByKeyword('orders', '_id', orderId)
                     .then((result) => {
