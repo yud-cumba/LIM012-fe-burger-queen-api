@@ -93,10 +93,12 @@ entregada por nuestra clienta, la API debe exponer los siguientes endpoints:
 #### 5.1,1 `/`
 
 * `GET /`
+![](/images/auth/get.png)
 
 #### 5.1.2 `/auth`
 
 * `POST /auth`
+![](/images/auth/Auth.png)
 
 #### 5.1.3 `/users`
 
