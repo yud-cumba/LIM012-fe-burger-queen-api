@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const express = require('express');
+const cors = require('cors');
 const config = require('./config');
 const authMiddleware = require('./middleware/auth');
 const errorHandler = require('./middleware/error');
@@ -9,6 +10,7 @@ const pkg = require('./package.json');
 // eslint-disable-next-line no-unused-vars
 const { port, dbUrl, secret } = config;
 const app = express(); // inicializarla
+app.use(cors());
 app.set('config', config); // settings nombre de variables
 app.set('pkg', pkg);
 

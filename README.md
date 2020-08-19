@@ -1,3 +1,5 @@
+![](/images/image-burger.png)
+
 # Burger Queen - API con Node.js
 
 ## Índice
@@ -35,20 +37,15 @@ ejemplo el navegador, cURL, ...), y el _servidor_ es el programa que recibe
 estas consultas y las responde.
 
 [Node.js](https://nodejs.org/) nos permite crear servidores web super eficientes
-de manera relativamente simple y todo esto usando JavaScript!
+de manera relativamente simple y todo esto usando JavaScript.
 
-En este proyecto partimos de un _boilerplate_ que ya contiene una serie de
-_endpoints_ (puntos de conexión o URLs) y nos piden completar la aplicación.
-Esto implica que tendremos que partir por leer la implementación existente, y
-familiarizarnos con el _stack_ elegido ([Node.js](https://nodejs.org/) y
-[Express](https://expressjs.com/)) y complementarlo con un motor de bases de
-datos, el cual tu deberás elegir entre [MongoDB](https://www.mongodb.com/) y
-[MySQL](https://www.mysql.com/).
+Para desarrollar la API rest utilizamos Nodejs y Express, lo complementamos con un motor de base de datos mysql.
+y para automatizar el despliegue de aplicaciones dentro de contenedores de software
+usamos docker.
 
 La clienta nos ha dado un [link a la documentación](https://laboratoria.github.io/burger-queen-api/)
 que especifica el comportamiento esperado de la API que expondremos por
-HTTP.  Ahí puedes encontrar todos los detalles de qué _endpoints_ debe
-implementar  la aplicación, qué parámetros esperan, qué deben responder, etc.
+HTTP.
 
 ## 3. Objetivos de aprendizaje
 
@@ -64,122 +61,28 @@ sobre `HTTP`, y desplegarlo en un servidor en la nube.
 Para completar el proyecto tendrás que familiarizarte con conceptos como
 **rutas** (_routes_), **URLs**, **HTTP** y **REST** (verbs, request, response, headers,
 body, status codes...), **JSON**, **JWT** (_JSON Web Tokens_), **conexión con
-una base datos** (`MongoDB` o `MySQL`), **variables de entorno**, **deployment**,
+una base datos** ( `MySQL`), **variables de entorno**, **deployment**,
 **contenedores de `docker`**...
-
-### Node
-
-* [ ] Instalar y usar modules
-* [ ] `npm scripts`
-
-### Express
-
-* [ ] Rutas
-* [ ] `middlewares`
-
-### HTTP
-
-* [ ] Request
-* [ ] Response
-* [ ] Headers
-* [ ] Body
-* [ ] Verbos HTTP
-* [ ] Codigos de status de HTTP
-* [ ] Encodings y `JSON`
-* [ ] CORS
-
-### Autenticación
-
-* [ ] `JWT`
-* [ ] Cómo guardar y validar contraseñas
-
-### Testing
-
-* [ ] Tests de integración
-* [ ] Tests unitarios
-
-### Frontend Development
-
-* [ ] Variables de entorno
-* [ ] `SSH`
-* [ ] `SSH` keys
-* [ ] Qué es un VPS
-
-### MongoDB o MySQL (según corresponda)
-
-* [ ] Instalación
-* [ ] Conexión a través de cliente
-* [ ] Connection string
-* [ ] Comandos/Queries de creacion, lectura, modificación y eliminación
-
-### Deployment
-
-* [ ] Contenedores
-* [ ] Qué es Docker
-* [ ] Qué es Docker compose
-* [ ] Uso de `docker-compose`
-
-### Colaboración y Organización con Git y Github
-
-* [ ] Forks
-* [ ] Branches
-* [ ] Pull Requests
-* [ ] Tags
-* [ ] Projects
-* [ ] Issues
-* [ ] Labels
-* [ ] Milestones
-
-### Buenas prácticas de desarrollo
-
-* [ ] Modularización
-* [ ] Nomenclatura / Semántica
-* [ ] Linting
 
 ## 4. Consideraciones generales
 
-* Este proyecto se realizará en duos y deberá integrarse con el proyecto
-[Burger Queen API client](link) que desarrolle simultáneamente el quipo
-de Frontend developers de tu squad.
-
-* La duración propuesta del proyecto es 5 sprints, con una duración de una 
-semana cada uno.
-
-* La lógica del proyecto debe estar implementada completamente en JavaScript (ES6).
+* La lógica del proyecto está implementada completamente en JavaScript (ES6).
 En este proyecto está permitido usar librerías o frameworks, asi como
 extensiones al lenguaje con `babel` (caso en el cual deberás incluir un
 comando `npm build`).
 
-* Los tests deben cubrir un mínimo del 90% de _statements_, _functions_,
+* Los tests deben cubren un mínimo del 90% de _statements_, _functions_,
 _lines_ y _branches_. Si bien el boilerplate no incluye la configuración para
 pruebas unitarias, estas son obligatorias.
 
-* Otro requerimiento del equipo de QA de nuestra clienta es realizar
-**pruebas _end-to-end_**, que usaremos para verificar el comportamiento desde el
+* Otro requerimiento del equipo de QA de nuestra clienta fue realizar
+**pruebas _end-to-end_**, que usamos para verificar el comportamiento desde el
 punto de vista de HTTP, desde afuera del servidor. Estos tests, a diferencia de
 las pruebas unitarias, no prueban cada pieza por separado sino que prueban la
 aplicación completa, de principio a fin. Estas pruebas, al no hacer uso directo
 del código fuente de la aplicación, pueden ejecutarse directamente sobre una URL
 remota, ya que la interfaz sometida a pruebas es HTTP.
-
-* El _boilerplate_ ya contiene el setup y configuración
-necesaria para ejecutar todos los tests _end-to-end_ con el comando `npm run test:e2e`.
-
-```sh
-# Corre pruebas e2e sobre instancia local. Esto levanta la aplicación con npm
-# start y corre los tests contra la URL de esta instancia (por defecto
-# http://127.0.0.1:8080).
-npm run test:e2e
-
-# Corre pruebas e2e sobre URL remota
-REMOTE_URL=<TODO: poner URL> npm run test:e2e
-```
-
-* Las pruebas _end-to-end_ ya están completas en el _boilerplate_, así que puedes
-usarlas como guía de implementación y checklist de completitud.
-
-## 5. Criterios de aceptación mínimos del proyecto
-
+o
 ### 5.1 API
 
 Según lo establecido por la [documentación](https://laboratoria.github.io/burger-queen-api/)
@@ -281,52 +184,3 @@ en la nube (VPS) (en el área de recursos te proponemos algunas alternativas de
 proveedores), acceder a él a través de `ssh`, clonar tu repositorio y ejecutar
 `docker-compose up` para levantar la aplicación y la documentación, para que
 queden online y accesibles.
-
-## 6. Pistas, tips y lecturas complementarias
-
-* [Express](https://expressjs.com/)
-* [MongoDB](https://www.mongodb.com/)
-* [MySQL](https://www.mysql.com/)
-* [docker](https://docs.docker.com/)
-* [docker compose](https://docs.docker.com/compose/)
-* [Postman](https://www.getpostman.com)
-* [Variable de entorno - Wikipedia](https://es.wikipedia.org/wiki/Variable_de_entorno)
-* [`process.env` - Node.js docs](https://nodejs.org/api/process.html#process_process_env)
-* TODO: providers de VPS recomendados, idealmente con un free tier o muy baratos.
-* [ssh](https://www.hostinger.es/tutoriales/que-es-ssh)
-
-***
-
-## 7 HTTP API Checklist
-
-### 7.1 `/`
-
-* [ ] `GET /`
-
-### 7.2 `/auth`
-
-* [ ] `POST /auth`
-
-### 7.3 `/users`
-
-* [ ] `GET /users`
-* [ ] `GET /users/:uid`
-* [ ] `POST /users`
-* [ ] `PUT /users/:uid`
-* [ ] `DELETE /users/:uid`
-
-### 7.4 `/products`
-
-* [ ] `GET /products`
-* [ ] `GET /products/:productid`
-* [ ] `POST /products`
-* [ ] `PUT /products/:productid`
-* [ ] `DELETE /products/:productid`
-
-### 7.5 `/orders`
-
-* [ ] `GET /orders`
-* [ ] `GET /orders/:orderId`
-* [ ] `POST /orders`
-* [ ] `PUT /orders/:orderId`
-* [ ] `DELETE /orders/:orderId`
