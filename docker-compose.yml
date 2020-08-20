@@ -12,7 +12,9 @@ services:
         MYSQL_USER: user
         MYSQL_PASSWORD: lim012
     volumes:
-      - mysql_data:/var/lib/mysql  
+      - mysql_data:/var/lib/mysql
+    expose:
+      - "3306"  
     ports:
       - "5000:3306"
       - "5001:33060"
@@ -28,17 +30,17 @@ services:
       - DUSER_DB=root
       - DPASSWORD_DB=rootroot
       - DDB_NAME=bq
-      - Port=8080
+      - PORT=8000
     links: 
       - db
     env_file:
       - secrets.env # los _secrets_ a incluir como variables de entorno. Usa el archivo `sample.secrets.env` como guia
     volumes:
       - ./:/home/node/app # montamos el codigo en el HOME del usuario _node_
-    expose:
-    - "8000" # nuestra app corre en el puerto 8080
+    # expose:
+    # - "8000" # nuestra app corre en el puerto 8080
     ports:
-      - "80:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
+      - "8000:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
     command: "bash -c 'rm -rf node_modules && npm install && npm start'" # reinstalamos las dependencias y levantamos el servidor
     depends_on:
       - db

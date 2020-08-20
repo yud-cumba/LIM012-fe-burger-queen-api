@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-const { pagination } = require('../utils/utils');
-const { getAllData } = require('../db-data/sql_functions');
+const { pagination, getOrderProduct } = require('../utils/utils');
+const { getAllData, getDataByKeyword } = require('../db-data/sql_functions');
 
 module.exports = {
   getData: (req, resp, next, table) => {
@@ -27,26 +27,31 @@ module.exports = {
             x._id = (!x._id) ? 0 : (x._id).toString();
             return x;
           });
-          // eslint-disable-next-line no-console
+          const variable = response.list.map((order) => getDataByKeyword('orders_products', 'orderId', order._id)
+            .then((array) => {
+              const arrayOrder = array.map((element) => getDataByKeyword('products', '_id', element.productId)
+                .then((product) => ({
+                  qty: element.qty,
+                  product: product[0],
+                })));
+              return Promise.all(arrayOrder)
+                .then((producto) => {
+                  order.products = producto;
+                  return order;
+                // return resp.status(200).send(order);
+                });
+            }));
           switch (table) {
             case 'users':
               return resp.status(200).send(jsonUserResp);
             case 'products':
               return resp.status(200).send(jsonProductResp);
+            // case 'orders':
             case 'orders':
-              return getAllData('orders_products')
-                .then((products) => {
-                  const listOfProducts = products.map((productObj) => ({
-                    qty: productObj.qty,
-                    product: productObj.product,
-                  }));
-                  const jsonOrderResp = response.list.map((x) => {
-                    x._id = (!x._id) ? 0 : (x._id).toString();
-                    x.products = listOfProducts;
-                    return x;
-                  });
-                  return resp.status(200).send(jsonOrderResp);
-                });
+              return Promise.all(variable).then((result) => {
+                resp.status(200).send(result);
+              });
+
             default:
               break;
           }
