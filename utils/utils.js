@@ -1,8 +1,7 @@
 /* eslint-disable no-param-reassign */
 const { getDataByKeyword } = require('../db-data/sql_functions');
 
-const pagination = (pagesNumber, limitsNumber, result, table) => {
-  const port = process.argv[2] || process.env.PORT || 8080;
+const pagination = (pagesNumber, limitsNumber, result, table, host) => {
   const pages = (!pagesNumber) ? 1 : pagesNumber;
   const limits = (!limitsNumber) ? result.length : limitsNumber;
   const startIndex = (pages - 1) * limits;
@@ -11,15 +10,14 @@ const pagination = (pagesNumber, limitsNumber, result, table) => {
   const totalPages = Math.round(result.length / limits);
   const previousPage = pages - 1;
   const nextPage = pages + 1;
-
-  let link = `<https://localhost:${port}/${table}?page=1&limit=${limits}>; rel="first",<https://localhost:${port}/${table}?page=${totalPages}&limit=${limits}>; rel="last"`;
+  let link = `<https://${host}/${table}?page=1&limit=${limits}>; rel="first",<https://${host}/${table}?page=${totalPages}&limit=${limits}>; rel="last"`;
   const results = {
     link,
   };
 
   if (pages > 0 && pages < (totalPages + 1)) {
-    const prev = `,<https://localhost:${port}/${table}?page=${previousPage}&limit=${limits}>; rel="prev",`;
-    const next = `<https://localhost:${port}/${table}?page=${nextPage}&limit=${limits}>; rel="next"`;
+    const prev = `,<https://${host}/${table}?page=${previousPage}&limit=${limits}>; rel="prev",`;
+    const next = `<https://${host}/${table}?page=${nextPage}&limit=${limits}>; rel="next"`;
     link = link.concat(prev, next);
     results.link = link;
     results.list = usersQueryLimits;

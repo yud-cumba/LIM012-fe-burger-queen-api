@@ -7,9 +7,10 @@ module.exports = {
     const { page, limit } = req.query;
     const pages = Number(page);
     const limits = Number(limit);
+    const host = req.get('host');
     getAllData(table)
       .then((result) => {
-        const response = pagination(pages, limits, result, table);
+        const response = pagination(pages, limits, result, table, host);
         resp.header('link', response.link);
         if (response.list) {
           const jsonUserResp = response.list.map((x) => {
@@ -27,6 +28,7 @@ module.exports = {
             x._id = (!x._id) ? 0 : (x._id).toString();
             return x;
           });
+
           const variable = response.list.map((order) => getDataByKeyword('orders_products', 'orderId', order._id)
             .then((array) => {
               const arrayOrder = array.map((element) => getDataByKeyword('products', '_id', element.productId)

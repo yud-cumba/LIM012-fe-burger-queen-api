@@ -102,6 +102,7 @@ entregada por nuestra clienta, la API debe exponer los siguientes endpoints:
 
 ![](/images/auth/Auth.png)
 
+
 #### 5.1.3 `/users`
 
 * `GET /users`
@@ -134,5 +135,12 @@ entregada por nuestra clienta, la API debe exponer los siguientes endpoints:
 * `POST /orders`
 * `PUT /orders/:orderId`
 * `DELETE /orders/:orderId`
+
+
+![](images/orders/GET-order.png)
+
+
+![](images/orders/PUT-order.png)
+
 
 
