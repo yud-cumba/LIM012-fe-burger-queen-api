@@ -28,7 +28,7 @@ services:
       - NODE_ENV=production
       - DHOST=db
       - DUSER_DB=user
-      - DPASSWORD_DB= lim012
+      - DPASSWORD_DB= laboratorialim012
       - DDB_NAME= databq
       - PORT=8000
     links: 
