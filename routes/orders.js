@@ -114,7 +114,6 @@ module.exports = (app, nextMain) => {
       status: 'pending',
       dateEntry: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
     };
-    console.log(newOrder);
     // saving orders in DB
     postData('orders', newOrder)
       .then((result) => {

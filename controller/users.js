@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 const { pagination } = require('../utils/utils');
-const { getAllData } = require('../db-data/sql_functions');
+const { getAllData, getDataByKeyword } = require('../db-data/sql_functions');
 
 module.exports = {
   getData: (req, resp, next, table) => {
@@ -11,6 +11,7 @@ module.exports = {
       .then((result) => {
         const response = pagination(pages, limits, result, table);
         resp.header('link', response.link);
+        console.log(response.list);
         if (response.list) {
           const jsonUserResp = response.list.map((x) => {
             const role = (x.rolesAdmin) || false;
@@ -27,6 +28,9 @@ module.exports = {
             x._id = (!x._id) ? 0 : (x._id).toString();
             return x;
           });
+          const jsonOrderResp = response.list.map((x) => {
+            x._id = (!x._id) ? 0 : (x._id).toString();
+          });
           // eslint-disable-next-line no-console
           switch (table) {
             case 'users':
@@ -34,19 +38,7 @@ module.exports = {
             case 'products':
               return resp.status(200).send(jsonProductResp);
             case 'orders':
-              return getAllData('orders_products')
-                .then((products) => {
-                  const listOfProducts = products.map((productObj) => ({
-                    qty: productObj.qty,
-                    product: productObj.product,
-                  }));
-                  const jsonOrderResp = response.list.map((x) => {
-                    x._id = (!x._id) ? 0 : (x._id).toString();
-                    x.products = listOfProducts;
-                    return x;
-                  });
-                  return resp.status(200).send(jsonOrderResp);
-                });
+              return resp.status(200).send(jsonOrderResp);
             default:
               break;
           }

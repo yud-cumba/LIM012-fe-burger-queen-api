@@ -7,8 +7,8 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-        MYSQL_ROOT_PASSWORD: rootroot
-        MYSQL_DATABASE: bq
+        MYSQL_ROOT_PASSWORD: '75587332'
+        MYSQL_DATABASE: databq
         MYSQL_USER: user
         MYSQL_PASSWORD: lim012
     volumes:
@@ -25,10 +25,10 @@ services:
     environment:
       - NODE_ENV=production
       - DHOST=db
-      - DUSER_DB=root
-      - DPASSWORD_DB=rootroot
-      - DDB_NAME=bq
-      - Port=8080
+      - DUSER_DB=user
+      - DPASSWORD_DB= lim012
+      - DDB_NAME= databq
+      - Port=8000
     links: 
       - db
     env_file:
@@ -38,12 +38,11 @@ services:
     expose:
     - "8000" # nuestra app corre en el puerto 8080
     ports:
-      - "80:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
+      - "8000:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
     command: "bash -c 'rm -rf node_modules && npm install && npm start'" # reinstalamos las dependencias y levantamos el servidor
     depends_on:
       - db
     networks:
-      - public
       - private
 volumes:
   mysql_data:     
