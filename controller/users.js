@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const { pagination, getOrderProduct } = require('../utils/utils');
+const { pagination } = require('../utils/utils');
 const { getAllData, getDataByKeyword } = require('../db-data/sql_functions');
 
 module.exports = {

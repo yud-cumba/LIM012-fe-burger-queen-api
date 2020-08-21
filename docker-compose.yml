@@ -37,8 +37,8 @@ services:
       - secrets.env # los _secrets_ a incluir como variables de entorno. Usa el archivo `sample.secrets.env` como guia
     volumes:
       - ./:/home/node/app # montamos el codigo en el HOME del usuario _node_
-    # expose:
-    # - "8000" # nuestra app corre en el puerto 8080
+    expose:
+    - "8000" # nuestra app corre en el puerto 8080
     ports:
       - "8000:8000" # mapeamos el puerto 8080 de nuestro contenedor al puerto 80 de nuestra maquina
     command: "bash -c 'rm -rf node_modules && npm install && npm start'" # reinstalamos las dependencias y levantamos el servidor
