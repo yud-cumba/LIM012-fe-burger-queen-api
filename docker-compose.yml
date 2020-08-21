@@ -10,7 +10,7 @@ services:
         MYSQL_ROOT_PASSWORD: '75587332'
         MYSQL_DATABASE: databq
         MYSQL_USER: user
-        MYSQL_PASSWORD: lim012
+        MYSQL_PASSWORD: laboratorialim012
     volumes:
       - mysql_data:/var/lib/mysql
     expose:
@@ -19,7 +19,6 @@ services:
       - "5000:3306"
       - "5001:33060"
     networks:
-      - public
       - private
   node:
     image: "node:10" # https://hub.docker.com/_/node/
