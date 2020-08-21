@@ -19,6 +19,7 @@ services:
       - "5000:3306"
       - "5001:33060"
     networks:
+      - public
       - private
   node:
     image: "node:14" # https://hub.docker.com/_/node/
@@ -30,7 +31,7 @@ services:
       - DUSER_DB=user
       - DPASSWORD_DB= lim012
       - DDB_NAME= databq
-      - Port=8000
+      - PORT=8000
     links: 
       - db
     env_file:
@@ -45,6 +46,7 @@ services:
     depends_on:
       - db
     networks:
+      - public
       - private
 volumes:
   mysql_data:     

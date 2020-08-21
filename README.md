@@ -1,6 +1,6 @@
 ![](/images/image-burger.png)
 
-# Burger Queen - API con Node.js
+# Burger Queen - API con Node.js y MySql server
 
 Link desplegado : (http://142.93.138.137:8000/)
 
