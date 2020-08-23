@@ -7,7 +7,7 @@ const pagination = (pagesNumber, limitsNumber, result, table, host) => {
   const startIndex = (pages - 1) * limits;
   const endIndex = pages * limits;
   const usersQueryLimits = result.slice(startIndex, endIndex);
-  const totalPages = Math.round(result.length / limits);
+  const totalPages = Math.ceil(result.length / limits);
   const previousPage = pages - 1;
   const nextPage = pages + 1;
   let link = `<https://${host}/${table}?page=1&limit=${limits}>; rel="first",<https://${host}/${table}?page=${totalPages}&limit=${limits}>; rel="last"`;
