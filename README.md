@@ -4,7 +4,7 @@
 
 Link desplegado : (http://142.93.138.137:8080/)
 
-[lick para ver una demostración grabada](https://www.loom.com/share/ee8fddf3572c45cfaef17bb66311dfde)
+(https://www.loom.com/share/ee8fddf3572c45cfaef17bb66311dfde)
 
 ## Índice
 
