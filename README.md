@@ -3,7 +3,8 @@
 # Burger Queen - API con Node.js y MySql server
 
 Link desplegado : (http://142.93.138.137:8080/)
-[Click para ver una demostración grabada] (https://www.loom.com/share/ee8fddf3572c45cfaef17bb66311dfde)
+
+[lick para ver una demostración grabada](https://www.loom.com/share/ee8fddf3572c45cfaef17bb66311dfde)
 
 ## Índice
 
@@ -27,6 +28,8 @@ interfaz,  que otro equipo de desarrolladoras está trabajando
 simultáneamente.
 
 ## 2. Resumen del proyecto
+
+![](/images/burger.png)
 
 Con una API en este caso nos referimos a un _servidor web_, que es
 básicamente un programa que _escucha_ en un puerto de red, a través del cual
