@@ -53,7 +53,6 @@ const getOrderProduct = (orderId, dataTableOrder, resp) => {
         order.products.forEach((x, i) => {
           x.qty = products[i].qty;
         });
-        console.log(order);
         return resp.status(200).send(order);
       })
         .catch((error) => console.error(error));

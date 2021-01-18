@@ -22,7 +22,8 @@ module.exports = (secret) => (req, resp, next) => {
     try {
       pool.query('SELECT * FROM users', (error, result) => {
         if (error) { throw error; }
-        // console.log(decodedToken);
+        // eslint-disable-next-line no-console
+        console.log(result);
         const userVerified = result.find((user) => user.email === decodedToken.email);
         if (userVerified) {
           req.user = userVerified;
